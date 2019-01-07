@@ -39,8 +39,8 @@ else:
 
 # Pre-start setup
 bot = commands.AutoShardedBot(command_prefix=commands.when_mentioned_or(">"))
-bot.activity = discord.Activity(type=discord.ActivityType.listening,
-                                name="binary data.")
+bot.activity = discord.Activity(type=discord.ActivityType.watching,
+                                name="Parsec develop.")
 state = {'state': 'starting',
          'persistent': {},
          'client': bot,
