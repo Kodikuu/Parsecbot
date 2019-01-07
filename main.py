@@ -1,7 +1,11 @@
 # Core Requirements
-import discord
 from discord.ext import commands
+from discord import Activity, ActivityType
 import asyncio
+
+# Uncomment this with a full IDE, it should warn that it's not in use
+# The idea being that we never import EVERYTHING. We don't need it all
+# import discord
 
 # File IO (Cryptographically Insecure)
 import json
@@ -39,12 +43,12 @@ else:
 
 # Pre-start setup
 bot = commands.AutoShardedBot(command_prefix=commands.when_mentioned_or(">"))
-bot.activity = discord.Activity(type=discord.ActivityType.watching,
-                                name="Parsec develop.")
+bot.activity = Activity(type=ActivityType.watching,
+                        name="Parsec develop.")
 state = {'state': 'starting',
          'persistent': {},
          'client': bot,
-         'ready_event': asyncio.Event(loop=bot.loop)
+         'ready_event': asyncio.Event(loop=bot.loop),
          }
 
 if path.exists('persistence.private') and path.isfile('persistence.private'):
