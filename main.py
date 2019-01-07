@@ -1,6 +1,6 @@
 # Core Requirements
 from discord.ext import commands
-from discord import Activity, ActivityType
+from discord import Activity, ActivityType, AppInfo
 import asyncio
 
 # Uncomment this with a full IDE, it should warn that it's not in use
@@ -23,18 +23,18 @@ if path.exists('core.private') and path.isfile('core.private'):
         core = json.load(file)
 
     if 'token' not in core.keys():
-        print("Token Missing.")
-        core['token'] = input("Token: ")
+        print('Token Missing.')
+        core['token'] = input('Token: ')
         with open('core.private', 'w') as file:
             json.dump(core, file)
 else:
-    print("Core data is missing.")
+    print('Core data is missing.')
 
-    token = input("Token: ")
-    if token == "":
-        raise ValueError("Invalid Token: Empty String")
+    token = input('Token: ')
+    if token == '':
+        raise ValueError('Invalid Token: Empty String')
 
-    core = {"token": token,
+    core = {'token': token,
             }
     del token  # We don't want extra auth token copies lying around.
 
@@ -42,9 +42,9 @@ else:
         json.dump(core, file)
 
 # Pre-start setup
-bot = commands.AutoShardedBot(command_prefix=commands.when_mentioned_or(">"))
+bot = commands.AutoShardedBot(command_prefix=commands.when_mentioned_or('>'))
 bot.activity = Activity(type=ActivityType.watching,
-                        name="Parsec develop.")
+                        name='Parsec develop.')
 state = {'state': 'starting',
          'persistent': {},
          'client': bot,
@@ -54,7 +54,7 @@ state = {'state': 'starting',
 if path.exists('persistence.private') and path.isfile('persistence.private'):
     with open('persistence.private', 'r') as file:
         state['persistent'] = json.load(file)
-        print("Loaded persistent data")
+        print('Loaded persistent data')
 else:
     with open('persistence.private', 'x') as file:
         json.dump(state['persistent'], file)
@@ -63,19 +63,20 @@ else:
 # Function + Event Definitions
 @bot.command()
 async def latency(ctx):
-    await ctx.send("Latency: " + str(bot.latency*1000)[:5] + "ms")
+    val = round(bot.latency, 5)
+    await ctx.send(f'Latency: {val}ms')
 
 
-@bot.command(description="Restart the bot.")
+@bot.command(description='Restart the bot.')
 async def restart(ctx):
-    await ctx.send("Restarting.")
+    await ctx.send('Restarting.')
     exit()
 
 
-@bot.command(description="Shut down the bot.", hidden=True)
+@bot.command(description='Shut down the bot.', hidden=True)
 @commands.is_owner()
 async def quit(ctx):
-    await ctx.send("Shutting Down.")
+    await ctx.send('Shutting Down.')
     state['state'] = 'shutdown'
     await bot.logout()
 
@@ -83,12 +84,12 @@ async def quit(ctx):
 @quit.error
 async def quit_error(ctx, error):
     if isinstance(error, commands.CheckFailure):
-        await ctx.send("Only the owner of this bot may shut me down.")
+        await ctx.send('Only {AppInfo.owner} may shut me down.')
     elif ctx.author.id == bot.owner_id:
-        await ctx.send("Something went very *very* ***wrong.***")
+        await ctx.send('Something went very *very* ***wrong.***')
 
 # Start bot
-print("Starting Bot")
+print('Starting Bot')
 
 bot.run(core['token'])
 
