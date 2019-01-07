@@ -79,7 +79,7 @@ async def quit(ctx):
 @quit.error
 async def quit_error(ctx, error):
     if isinstance(error, commands.CheckFailure):
-        await ctx.send("Only Kodikuu may shut me down.")
+        await ctx.send("Only the owner of this bot may shut me down.")
     elif ctx.author.id == bot.owner_id:
         await ctx.send("Something went very *very* ***wrong.***")
 
