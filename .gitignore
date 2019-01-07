@@ -105,3 +105,5 @@ venv.bak/
 
 # Project-Specific
 .private
+
+*.private
