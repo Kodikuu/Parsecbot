@@ -15,6 +15,9 @@ from os import path
 import time
 import datetime
 
+# Error code scraping
+import requests
+
 # Additional Requirements
 
 # Pre-start configuration and token loading
@@ -61,6 +64,29 @@ else:
 
 
 # Function + Event Definitions
+
+async def errorScrape(url = "https://support.parsecgaming.com/hc/en-us/sections/115000849851-Error-Codes"):
+    r = requests.get(url)
+
+    data = []
+    for item in r.iter_lines():
+        if "Error Codes - " in str(item):
+            data.append(str(item))
+
+    errorlist = []
+    for item in data:
+        tl = {}
+        tmp = item.split(">")[1].split("<")[0].replace("&#39;", "'")
+
+        tl['url'] = "https://support.parsecgaming.com" + item.split("\"")[1][:31]
+        tl['title'] = tmp
+        tl['desc'] = tmp[len(tmp.split("(")[0])+1:-1]
+        tl['code'] = [word for word in tmp.split("(")[0].split() if word.isdigit()]
+
+        errorlist.append(tl)
+        state['elist'] = errorlist
+
+
 @bot.command()
 async def latency(ctx):
     val = round(bot.latency, 5)
