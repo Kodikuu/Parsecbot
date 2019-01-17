@@ -102,15 +102,16 @@ async def on_message(message):
     if message.author == bot.user:
         return
 
-    # Look for error codes
-    tmp = message.content.split()
-    for i in tmp:
-        if i.isdigit():
-            await errorScrape()
-            for error in state['elist']:
-                for code in error['code']:
-                    if i == code:
-                        await handleCode(message, error)
+    # Look for error codes if a command isn't used.
+    if not (message.content.startswith(">") or bot.user in message.mentions):
+        tmp = message.content.split()
+        for i in tmp:
+            if i.isdigit():
+                await errorScrape()
+                for error in state['elist']:
+                    for code in error['code']:
+                        if i == code:
+                            await handleCode(message, error)
     await bot.process_commands(message)
 
 
@@ -134,11 +135,32 @@ async def handleCode(message, error):
             # await message.channel.send(f"{error['title']}, <{error['url']}>")
             rembed = Embed(description=f"[{error['title']}]({error['url']})",
                            timestamp=datetime.datetime.now(),
-                           color=Color.dark_red(),
-                           url=error['url'])
+                           color=Color.dark_red())
             await message.channel.send(embed=rembed)
             await asyncio.sleep(5)
             await message.clear_reactions()
+
+
+@bot.command()
+async def error(ctx, errorcode):
+    await errorScrape()
+    for error in state['elist']:
+        for code in error['code']:
+            if errorcode == code:
+                emb = Embed(description=f"[{error['title']}]({error['url']})",
+                            timestamp=datetime.datetime.now(),
+                            color=Color.dark_red(),
+                            url=error['url'])
+                await ctx.channel.send(embed=emb)
+                return
+    else:
+        emb = Embed(title=f"{errorcode} Not Documented.",
+                    description="Please contact staff or correct your error code.",
+                    timestamp=datetime.datetime.now(),
+                    color=Color.dark_red())
+        await ctx.channel.send(embed=emb)
+
+
 
 
 @bot.command()
