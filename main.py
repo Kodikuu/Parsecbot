@@ -125,6 +125,8 @@ async def handleCode(message, error):
                            color=Color.dark_red(),
                            url=error['url'])
             await message.channel.send(embed=rembed)
+            await asyncio.sleep(5)
+            await message.clear_reactions()
 
 
 @bot.command()
