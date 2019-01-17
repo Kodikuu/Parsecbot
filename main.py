@@ -12,7 +12,7 @@ import json
 from os import path
 
 # Timers
-import time
+from time import time
 import datetime
 
 # Error code scraping
@@ -52,6 +52,7 @@ state = {'state': 'starting',
          'persistent': {},
          'client': bot,
          'ready_event': asyncio.Event(loop=bot.loop),
+         'etime': 0
          }
 
 if path.exists('persistence.private') and path.isfile('persistence.private'):
@@ -66,6 +67,8 @@ else:
 # Function + Event Definitions
 
 async def errorScrape(url=None):
+    if state['etime'] > time() - 60:
+        return  # Don't repeat more than once a minute
     if url is None:
         url = "https://support.parsecgaming.com/hc/en-us/sections/115000849851"
     r = requests.get(url)
