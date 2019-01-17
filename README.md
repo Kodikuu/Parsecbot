@@ -8,3 +8,4 @@
 ## How to run:
 - Clone repo
 - run bootstrap.py
+- enter your bot token
