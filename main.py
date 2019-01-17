@@ -65,7 +65,9 @@ else:
 
 # Function + Event Definitions
 
-async def errorScrape(url = "https://support.parsecgaming.com/hc/en-us/sections/115000849851-Error-Codes"):
+async def errorScrape(url=None):
+    if url is None:
+        url = "https://support.parsecgaming.com/hc/en-us/sections/115000849851"
     r = requests.get(url)
 
     data = []
@@ -78,10 +80,14 @@ async def errorScrape(url = "https://support.parsecgaming.com/hc/en-us/sections/
         tl = {}
         tmp = item.split(">")[1].split("<")[0].replace("&#39;", "'")
 
-        tl['url'] = "https://support.parsecgaming.com" + item.split("\"")[1][:31]
+        val = "https://support.parsecgaming.com" + item.split("\"")[1][:31]
+        tl['url'] = val
+
+        val = [word for word in tmp.split("(")[0].split() if word.isdigit()]
+        tl['code'] = val
+
         tl['title'] = tmp
         tl['desc'] = tmp[len(tmp.split("(")[0])+1:-1]
-        tl['code'] = [word for word in tmp.split("(")[0].split() if word.isdigit()]
 
         errorlist.append(tl)
         state['elist'] = errorlist
@@ -107,12 +113,15 @@ async def on_message(message):
 
 async def handleCode(message, error):
     def check(reaction, user):
-        return str(reaction.emoji) == '❎' or str(reaction.emoji) == '✅' and not user == bot.user
+        e = str(reaction.emoji)
+        return e == '❎' or e == '✅' and not user == bot.user
 
     await message.add_reaction("❎")
     await message.add_reaction("✅")
     try:
-        reaction, user = await bot.wait_for('reaction_add', timeout=60.0, check=check)
+        reaction, user = await bot.wait_for('reaction_add',
+                                            timeout=60.0,
+                                            check=check)
     except asyncio.TimeoutError:
         await message.clear_reactions()
     else:
