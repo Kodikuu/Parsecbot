@@ -1,6 +1,6 @@
 # Core Requirements
 from discord.ext import commands
-from discord import Activity, ActivityType, AppInfo
+from discord import Activity, ActivityType, AppInfo, Color, Embed
 import asyncio
 
 # Uncomment this with a full IDE, it should warn that it's not in use
@@ -119,7 +119,12 @@ async def handleCode(message, error):
         await message.clear_reactions()
         if str(reaction.emoji) == '✅':
             await message.add_reaction("🆗")
-            await message.channel.send(f"{error['title']}, <{error['url']}>")
+            # await message.channel.send(f"{error['title']}, <{error['url']}>")
+            rembed = Embed(description=f"[{error['title']}]({error['url']})",
+                           timestamp=datetime.datetime.now(),
+                           color=Color.dark_red(),
+                           url=error['url'])
+            await message.channel.send(embed=rembed)
 
 
 @bot.command()
