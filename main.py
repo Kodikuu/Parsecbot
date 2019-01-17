@@ -87,6 +87,41 @@ async def errorScrape(url = "https://support.parsecgaming.com/hc/en-us/sections/
         state['elist'] = errorlist
 
 
+@bot.event
+async def on_message(message):
+    # Return if bot message
+    if message.author == bot.user:
+        return
+
+    # Look for error codes
+    tmp = message.content.split()
+    for i in tmp:
+        if i.isdigit():
+            await errorScrape()
+            for error in state['elist']:
+                for code in error['code']:
+                    if i == code:
+                        await handleCode(message, error)
+    await bot.process_commands(message)
+
+
+async def handleCode(message, error):
+    def check(reaction, user):
+        return str(reaction.emoji) == '❎' or str(reaction.emoji) == '✅' and not user == bot.user
+
+    await message.add_reaction("❎")
+    await message.add_reaction("✅")
+    try:
+        reaction, user = await bot.wait_for('reaction_add', timeout=60.0, check=check)
+    except asyncio.TimeoutError:
+        await message.clear_reactions()
+    else:
+        await message.clear_reactions()
+        if str(reaction.emoji) == '✅':
+            await message.add_reaction("🆗")
+            await message.channel.send(f"{error['title']}, <{error['url']}>")
+
+
 @bot.command()
 async def latency(ctx):
     val = round(bot.latency, 5)
