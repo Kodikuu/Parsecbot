@@ -169,7 +169,7 @@ async def errorProcess(ctx, ecode, explicit=False):
         if key not in error.keys():
             error[key] = ""
 
-    errorResponse(ctx, error, explicit)
+    await errorResponse(ctx, error, explicit)
 
 
 async def errorResponse(ctx, error, explicit=False):
