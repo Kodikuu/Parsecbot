@@ -232,14 +232,14 @@ async def erroredit(ctx, code, key, *desc):
     if key not in ["title", "url", "desc", "remove"]:
         ctx.send("Invalid key to edit")
 
-    if key == "remove":
-        del state["persistent"]["errors"][code]
-        return
-
     if code not in state["persistent"]["errors"].keys():
         state["persistent"]["errors"][code] = {}
 
-    state["persistent"]["errors"][code][key] = ' '.join(desc)
+    if key == "remove":
+        del state["persistent"]["errors"][code]
+        return
+    else:
+        state["persistent"]["errors"][code][key] = ' '.join(desc)
     await saveP()
     await ctx.message.add_reaction("🆗")
     await asyncio.sleep(5)
