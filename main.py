@@ -142,6 +142,11 @@ async def handleCode(message, error):
             await message.clear_reactions()
 
 
+async def saveP():
+    with open('persistence.private', 'x') as file:
+        json.dump(state['persistent'], file)
+
+
 @bot.command()
 async def error(ctx, errorcode):
     await errorScrape()
@@ -161,6 +166,31 @@ async def error(ctx, errorcode):
         await ctx.channel.send(embed=emb)
 
 
+@bot.command()
+async def errordesc(ctx, code, *desc):
+    if "errors" in state["persistent"].keys():
+        state["persistent"]["errors"] = {}
+
+    state["persistent"]["errors"][code]['desc'] = ' '.join(desc)
+    await saveP()
+
+
+@bot.command()
+async def errorurl(ctx, code, *url):
+    if "errors" in state["persistent"].keys():
+        state["persistent"]["errors"] = {}
+
+    state["persistent"]["errors"][code]['url'] = ' '.join(url)
+    await saveP()
+
+
+@bot.command()
+async def errortitle(ctx, code, *title):
+    if "errors" in state["persistent"].keys():
+        state["persistent"]["errors"] = {}
+
+    state["persistent"]["errors"][code]['title'] = ' '.join(title)
+    await saveP()
 
 
 @bot.command()
