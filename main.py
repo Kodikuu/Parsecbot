@@ -117,6 +117,7 @@ async def on_message(message):
     if message.author == bot.user:
         return
 
+    # Anything that isn't a command goes inside this 'if' statement.
     if not (message.content.startswith(">") or bot.user in message.mentions):
         # Look for error codes if a command isn't used.
         tmp = message.content.split()
@@ -134,7 +135,15 @@ async def on_message(message):
                 await errorProcess(message, code, False)
                 return
 
+        # Implement basic anti-spam
+
     await bot.process_commands(message)
+
+
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CheckFailure):
+        await ctx.send("You do not have permission to use that command.")
 
 
 async def saveP():
