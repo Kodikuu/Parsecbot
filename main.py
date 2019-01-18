@@ -135,33 +135,30 @@ async def error(ctx, errorcode):
     await errorProcess(ctx, errorcode, True)
 
 
-async def errorProcess(ctx, errorcode, explicit=False):
-    def check(reaction, user):
-        e = str(reaction.emoji)
-        return e == '❎' or e == '✅' and not user == bot.user
-
+async def errorProcess(ctx, ecode, explicit=False):
     # Get scraped error
     error = None
     for e in state['elist']:
         if error is not None:
             break
         for code in e['code']:
-            if errorcode == code:
+            if ecode == code:
                 error = e
                 # Correct error with persistent modifications.
-                if errorcode in state["persistent"]["errors"].keys():
-                    for key in state["persistent"]["errors"][errorcode].keys():
-                        error[key] = state["persistent"]["errors"][errorcode][key]
+                if ecode in state["persistent"]["errors"].keys():
+                    for key in state["persistent"]["errors"][ecode].keys():
+                        error[key] = state["persistent"]["errors"][ecode][key]
                 break
     else:
         # Search through persistence data for manually added key
-        if errorcode in state["persistent"]["errors"].keys():
-            error = state["persistent"]["errors"][errorcode]
+        if ecode in state["persistent"]["errors"].keys():
+            error = state["persistent"]["errors"][ecode]
 
         else:
             if explicit:
-                emb = Embed(title=f"{errorcode} Not Documented.",
-                            description="Please contact staff or correct your error code.",
+                desc = "Please contact staff or correct your error code."
+                emb = Embed(title=f"{ecode} Not Documented.",
+                            description=desc,
                             timestamp=datetime.datetime.now(),
                             color=Color.dark_red())
                 await ctx.channel.send(embed=emb)
@@ -171,6 +168,14 @@ async def errorProcess(ctx, errorcode, explicit=False):
     for key in ["title", "desc", "url"]:
         if key not in error.keys():
             error[key] = ""
+
+    errorResponse(ctx, error, explicit)
+
+
+async def errorResponse(ctx, error, explicit=False):
+    def check(reaction, user):
+        e = str(reaction.emoji)
+        return e == '❎' or e == '✅' and not user == bot.user
 
     # Output error immediately if explicit.
     if explicit:
