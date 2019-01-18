@@ -92,8 +92,10 @@ async def on_message(message):
     # Anything that isn't a command goes inside this 'if' statement.
     if not (message.content.startswith(">") or bot.user in message.mentions):
         # Look for error codes if a command isn't used.
-        await eSupport.checkNums(message)
-        await eSupport.checkWords(message)
+        if await eSupport.checkNums(message):
+            return
+        if await eSupport.checkWords(message):
+            return
 
         # Implement basic anti-spam
 
