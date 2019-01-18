@@ -52,7 +52,8 @@ state = {'state': 'starting',
          'persistent': {},
          'client': bot,
          'ready_event': asyncio.Event(loop=bot.loop),
-         'etime': 0
+         'etime': 0,
+         'erun': asyncio.Event(loop=bot.loop),
          }
 
 if path.exists('persistence.private') and path.isfile('persistence.private'):
@@ -79,38 +80,45 @@ def is_admin():
     return commands.check(predicate)
 
 
+# Background Tasks
+async def errorScrape():
+    url = "https://support.parsecgaming.com/hc/en-us/sections/115000849851"
+    while True:
+        await state['erun'].wait()  # Wait until triggered
+
+        if state['etime'] > time() - 60:
+            state['erun'].unset()
+            return  # Don't repeat more than once a minute
+
+        r = requests.get(url)
+
+        data = []
+        for item in r.iter_lines():
+            if "Error Codes - " in str(item):
+                data.append(str(item))
+
+        errorlist = []
+        for item in data:
+            tl = {}
+
+            v = "https://support.parsecgaming.com" + item.split("\"")[1][:31]
+            tl['url'] = v
+
+            tmp = item.split(">")[1].split("<")[0].replace("&#39;", "'")
+
+            v = [word for word in tmp.split("(")[0].split() if word.isdigit()]
+            tl['code'] = v
+
+            tl['title'] = tmp
+            tl['desc'] = tmp[len(tmp.split("(")[0])+1:-1]
+
+            errorlist.append(tl)
+            state['elist'] = errorlist
+
+        state['erun'].clear()
+
+
 # Function + Event Definitions
-async def errorScrape(url=None):
-    if state['etime'] > time() - 60:
-        return  # Don't repeat more than once a minute
-    if url is None:
-        url = "https://support.parsecgaming.com/hc/en-us/sections/115000849851"
-    r = requests.get(url)
-
-    data = []
-    for item in r.iter_lines():
-        if "Error Codes - " in str(item):
-            data.append(str(item))
-
-    errorlist = []
-    for item in data:
-        tl = {}
-
-        val = "https://support.parsecgaming.com" + item.split("\"")[1][:31]
-        tl['url'] = val
-
-        tmp = item.split(">")[1].split("<")[0].replace("&#39;", "'")
-
-        val = [word for word in tmp.split("(")[0].split() if word.isdigit()]
-        tl['code'] = val
-
-        tl['title'] = tmp
-        tl['desc'] = tmp[len(tmp.split("(")[0])+1:-1]
-
-        errorlist.append(tl)
-        state['elist'] = errorlist
-
-
 @bot.event
 async def on_message(message):
     # Return if bot message
@@ -124,14 +132,14 @@ async def on_message(message):
         for i in tmp:
             if i.isdigit() or i in state['persistent']['errors'].keys():
                 # If any 'word' in the message is a number, or a manual error.
-                await errorScrape()
+                state['erun'].set()
                 await errorProcess(message, i, False)
                 return
 
         # Look for error phrases if a command isn't used.
         for code in state['persistent']['errors'].keys():
             if code.lower() in message.content.lower():
-                await errorScrape()
+                state['erun'].set()
                 await errorProcess(message, code, False)
                 return
 
@@ -154,8 +162,15 @@ async def saveP():
 @bot.command()
 async def error(ctx, errorcode):
     # Just makes things easier when running errorprocess not as a command.
-    await errorScrape()
+    state['erun'].set()
     await errorProcess(ctx, errorcode, True)
+
+
+@bot.command()
+@is_admin()
+async def scrape(ctx):
+    state['etime'] = 0
+    state['erun'].set()
 
 
 async def errorProcess(ctx, ecode, explicit=False):
@@ -281,6 +296,9 @@ async def quit_error(ctx, error):
         await ctx.send(f'Only {AppInfo.owner} may shut me down.')
     elif ctx.author.id == bot.owner_id:
         await ctx.send('Something went very *very* ***wrong.***')
+
+# Register tasks
+bot.loop.create_task(errorScrape())
 
 # Start bot
 print('Starting Bot')
