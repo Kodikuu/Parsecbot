@@ -211,9 +211,9 @@ async def erroredit(ctx, code, key, *desc):
 
     state["persistent"]["errors"][code][key] = ' '.join(desc)
     await saveP()
-    await ctx.add_reaction("🆗")
+    await ctx.message.add_reaction("🆗")
     await asyncio.sleep(5)
-    await ctx.clear_reactions()
+    await ctx.message.clear_reactions()
 
 
 @bot.command()
