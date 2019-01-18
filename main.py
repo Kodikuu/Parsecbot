@@ -1,6 +1,6 @@
 # Core Requirements
 from discord.ext import commands
-from discord import Activity, ActivityType, AppInfo, Color, Embed
+from discord import Activity, ActivityType, AppInfo
 import asyncio
 
 # Uncomment this with a full IDE, it should warn that it's not in use
@@ -13,12 +13,12 @@ from os import path
 
 # Timers
 from time import time
-import datetime
 
 # Error code scraping
 import requests
 
 # Additional Requirements
+import errorSupport
 
 # Pre-start configuration and token loading
 if path.exists('core.private') and path.isfile('core.private'):
@@ -81,42 +81,6 @@ def is_admin():
 
 
 # Background Tasks
-async def errorScrape():
-    url = "https://support.parsecgaming.com/hc/en-us/sections/115000849851"
-    while True:
-        await state['erun'].wait()  # Wait until triggered
-
-        if state['etime'] > time() - 60:
-            state['erun'].unset()
-            return  # Don't repeat more than once a minute
-
-        r = requests.get(url)
-
-        data = []
-        for item in r.iter_lines():
-            if "Error Codes - " in str(item):
-                data.append(str(item))
-
-        errorlist = []
-        for item in data:
-            tl = {}
-
-            v = "https://support.parsecgaming.com" + item.split("\"")[1][:31]
-            tl['url'] = v
-
-            tmp = item.split(">")[1].split("<")[0].replace("&#39;", "'")
-
-            v = [word for word in tmp.split("(")[0].split() if word.isdigit()]
-            tl['code'] = v
-
-            tl['title'] = tmp
-            tl['desc'] = tmp[len(tmp.split("(")[0])+1:-1]
-
-            errorlist.append(tl)
-            state['elist'] = errorlist
-
-        state['erun'].clear()
-
 
 # Function + Event Definitions
 @bot.event
@@ -128,20 +92,8 @@ async def on_message(message):
     # Anything that isn't a command goes inside this 'if' statement.
     if not (message.content.startswith(">") or bot.user in message.mentions):
         # Look for error codes if a command isn't used.
-        tmp = message.content.split()
-        for i in tmp:
-            if i.isdigit() or i in state['persistent']['errors'].keys():
-                # If any 'word' in the message is a number, or a manual error.
-                state['erun'].set()
-                await errorProcess(message, i, False)
-                return
-
-        # Look for error phrases if a command isn't used.
-        for code in state['persistent']['errors'].keys():
-            if code.lower() in message.content.lower():
-                state['erun'].set()
-                await errorProcess(message, code, False)
-                return
+        await eSupport.checkNums(message)
+        await eSupport.checkWords(message)
 
         # Implement basic anti-spam
 
@@ -152,121 +104,13 @@ async def on_message(message):
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CheckFailure):
         await ctx.send("You do not have permission to use that command.")
+    else:
+        raise error
 
 
 async def saveP():
     with open('persistence.private', 'w') as file:
         json.dump(state['persistent'], file)
-
-
-@bot.command()
-async def error(ctx, errorcode):
-    # Just makes things easier when running errorprocess not as a command.
-    state['erun'].set()
-    await errorProcess(ctx, errorcode, True)
-
-
-@bot.command()
-@is_admin()
-async def scrape(ctx):
-    state['etime'] = 0
-    state['erun'].set()
-
-
-async def errorProcess(ctx, ecode, explicit=False):
-    # Get scraped error
-    error = None
-    for e in state['elist']:
-        if error is not None:
-            break
-        for code in e['code']:
-            if ecode == code:
-                error = e
-                # Correct error with persistent modifications.
-                if ecode in state["persistent"]["errors"].keys():
-                    for key in state["persistent"]["errors"][ecode].keys():
-                        error[key] = state["persistent"]["errors"][ecode][key]
-                break
-    else:
-        # Search through persistence data for manually added key
-        if ecode in state["persistent"]["errors"].keys():
-            error = state["persistent"]["errors"][ecode]
-
-        else:
-            if explicit:
-                desc = "Please contact staff or correct your error code."
-                emb = Embed(title=f"{ecode}: Not Documented.",
-                            description=desc,
-                            timestamp=datetime.datetime.now(),
-                            color=Color.dark_red())
-                await ctx.channel.send(embed=emb)
-            return  # No error found
-
-    # Ensure error is complete, input placeholders if not
-    for key in ["title", "desc", "url"]:
-        if key not in error.keys():
-            error[key] = ""
-
-    await errorResponse(ctx, error, explicit)
-
-
-async def errorResponse(ctx, error, explicit=False):
-    def check(reaction, user):
-        e = str(reaction.emoji)
-        return e == '❎' or e == '✅' and not user == bot.user
-
-    # Output error immediately if explicit.
-    if explicit:
-        rembed = Embed(title=error['title'],
-                       description=error['desc'],
-                       url=error['url'],
-                       timestamp=datetime.datetime.now(),
-                       color=Color.dark_red())
-        await ctx.channel.send(embed=rembed)
-
-    else:  # Go through steps if not explicit
-        await ctx.add_reaction("❎")
-        await ctx.add_reaction("✅")
-        try:
-            reaction, user = await bot.wait_for('reaction_add',
-                                                timeout=60.0,
-                                                check=check)
-        except asyncio.TimeoutError:
-            await ctx.clear_reactions()
-        else:
-            await ctx.clear_reactions()
-            if str(reaction.emoji) == '✅':
-                await ctx.add_reaction("🆗")
-                rembed = Embed(title=error['title'],
-                               description=error['desc'],
-                               url=error['url'],
-                               timestamp=datetime.datetime.now(),
-                               color=Color.dark_red())
-                await ctx.channel.send(embed=rembed)
-                await asyncio.sleep(5)
-                await ctx.clear_reactions()
-
-
-@bot.command()
-@is_admin()
-async def erroredit(ctx, code, key, *desc):
-    if "errors" not in state["persistent"].keys():
-        state["persistent"]["errors"] = {}
-
-    if key not in ["title", "url", "desc", "remove"]:
-        ctx.send("Invalid key to edit")
-
-    if code not in state["persistent"]["errors"].keys():
-        state["persistent"]["errors"][code] = {}
-
-    if key == "remove":
-        del state["persistent"]["errors"][code]
-    else:
-        state["persistent"]["errors"][code][key] = ' '.join(desc)
-    await saveP()
-    await ctx.message.add_reaction("🆗")
-    await asyncio.sleep(5)
-    await ctx.message.clear_reactions()
 
 
 @bot.command()
@@ -297,8 +141,11 @@ async def quit_error(ctx, error):
     elif ctx.author.id == bot.owner_id:
         await ctx.send('Something went very *very* ***wrong.***')
 
+# Initialise module classes
+eSupport = errorSupport.eSupport(bot)
+bot.add_cog(eSupport)
+
 # Register tasks
-bot.loop.create_task(errorScrape())
 
 # Start bot
 print('Starting Bot')
