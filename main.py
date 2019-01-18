@@ -237,7 +237,6 @@ async def erroredit(ctx, code, key, *desc):
 
     if key == "remove":
         del state["persistent"]["errors"][code]
-        return
     else:
         state["persistent"]["errors"][code][key] = ' '.join(desc)
     await saveP()
