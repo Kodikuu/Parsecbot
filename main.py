@@ -81,10 +81,11 @@ async def errorScrape(url=None):
     errorlist = []
     for item in data:
         tl = {}
-        tmp = item.split(">")[1].split("<")[0].replace("&#39;", "'")
 
         val = "https://support.parsecgaming.com" + item.split("\"")[1][:31]
         tl['url'] = val
+
+        tmp = item.split(">")[1].split("<")[0].replace("&#39;", "'")
 
         val = [word for word in tmp.split("(")[0].split() if word.isdigit()]
         tl['code'] = val
@@ -106,7 +107,7 @@ async def on_message(message):
     if not (message.content.startswith(">") or bot.user in message.mentions):
         tmp = message.content.split()
         for i in tmp:
-            if i.isdigit():
+            if i.isdigit():  # If any 'word' in the message is a number.
                 await errorScrape()
                 for error in state['elist']:
                     for code in error['code']:
@@ -133,7 +134,7 @@ async def handleCode(message, error):
         if str(reaction.emoji) == '✅':
             await message.add_reaction("🆗")
             # await message.channel.send(f"{error['title']}, <{error['url']}>")
-            rembed = Embed(description=f"[{error['title']}]({error['url']})",
+            rembed = Embed(title=f"[{error['title']}]({error['url']})",
                            timestamp=datetime.datetime.now(),
                            color=Color.dark_red())
             await message.channel.send(embed=rembed)
@@ -147,10 +148,9 @@ async def error(ctx, errorcode):
     for error in state['elist']:
         for code in error['code']:
             if errorcode == code:
-                emb = Embed(description=f"[{error['title']}]({error['url']})",
+                emb = Embed(title=f"[{error['title']}]({error['url']})",
                             timestamp=datetime.datetime.now(),
-                            color=Color.dark_red(),
-                            url=error['url'])
+                            color=Color.dark_red())
                 await ctx.channel.send(embed=emb)
                 return
     else:
