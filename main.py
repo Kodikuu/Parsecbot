@@ -109,88 +109,111 @@ async def on_message(message):
         for i in tmp:
             if i.isdigit():  # If any 'word' in the message is a number.
                 await errorScrape()
-                for error in state['elist']:
-                    for code in error['code']:
-                        if i == code:
-                            await handleCode(message, error)
+                await errorprocess(message, i, False)
     await bot.process_commands(message)
 
 
-async def handleCode(message, error):
-    def check(reaction, user):
-        e = str(reaction.emoji)
-        return e == '❎' or e == '✅' and not user == bot.user
-
-    await message.add_reaction("❎")
-    await message.add_reaction("✅")
-    try:
-        reaction, user = await bot.wait_for('reaction_add',
-                                            timeout=60.0,
-                                            check=check)
-    except asyncio.TimeoutError:
-        await message.clear_reactions()
-    else:
-        await message.clear_reactions()
-        if str(reaction.emoji) == '✅':
-            await message.add_reaction("🆗")
-            # await message.channel.send(f"{error['title']}, <{error['url']}>")
-            rembed = Embed(title=f"[{error['title']}]({error['url']})",
-                           timestamp=datetime.datetime.now(),
-                           color=Color.dark_red())
-            await message.channel.send(embed=rembed)
-            await asyncio.sleep(5)
-            await message.clear_reactions()
-
-
 async def saveP():
-    with open('persistence.private', 'x') as file:
+    with open('persistence.private', 'w') as file:
         json.dump(state['persistent'], file)
 
 
 @bot.command()
 async def error(ctx, errorcode):
+    # Just makes things easier when running errorprocess not as a command.
     await errorScrape()
-    for error in state['elist']:
-        for code in error['code']:
+    await errorprocess(ctx, errorcode, True)
+
+
+async def errorprocess(ctx, errorcode, explicit=False):
+    def check(reaction, user):
+        e = str(reaction.emoji)
+        return e == '❎' or e == '✅' and not user == bot.user
+
+    # Get scraped error
+    error = None
+    for e in state['elist']:
+        if error is not None:
+            break
+        for code in e['code']:
             if errorcode == code:
-                emb = Embed(title=f"[{error['title']}]({error['url']})",
+                error = e
+                # Correct error with persistent modifications.
+                if errorcode in state["persistent"]["errors"].keys():
+                    for key in state["persistent"]["errors"][errorcode].keys():
+                        error[key] = state["persistent"]["errors"][errorcode][key]
+                break
+    else:
+        # Search through persistence data for manually added key
+        if errorcode in state["persistent"]["errors"].keys():
+            error = state["persistent"]["errors"][errorcode]
+
+        else:
+            if explicit:
+                emb = Embed(title=f"{errorcode} Not Documented.",
+                            description="Please contact staff or correct your error code.",
                             timestamp=datetime.datetime.now(),
                             color=Color.dark_red())
                 await ctx.channel.send(embed=emb)
-                return
-    else:
-        emb = Embed(title=f"{errorcode} Not Documented.",
-                    description="Please contact staff or correct your error code.",
-                    timestamp=datetime.datetime.now(),
-                    color=Color.dark_red())
-        await ctx.channel.send(embed=emb)
+            return  # No error found
+
+    # Ensure error is complete, input placeholders if not
+    for key in ["title", "desc", "url"]:
+        if key not in error.keys():
+            error[key] = ""
+
+    # Output error immediately if explicit.
+    if explicit:
+        rembed = Embed(title=error['title'],
+                       description=error['desc'],
+                       url=error['url'],
+                       timestamp=datetime.datetime.now(),
+                       color=Color.dark_red())
+        await ctx.channel.send(embed=rembed)
+
+    else:  # Go through steps if not explicit
+        await ctx.add_reaction("❎")
+        await ctx.add_reaction("✅")
+        try:
+            reaction, user = await bot.wait_for('reaction_add',
+                                                timeout=60.0,
+                                                check=check)
+        except asyncio.TimeoutError:
+            await ctx.clear_reactions()
+        else:
+            await ctx.clear_reactions()
+            if str(reaction.emoji) == '✅':
+                await ctx.add_reaction("🆗")
+                rembed = Embed(title=error['title'],
+                               description=error['desc'],
+                               url=error['url'],
+                               timestamp=datetime.datetime.now(),
+                               color=Color.dark_red())
+                await ctx.channel.send(embed=rembed)
+                await asyncio.sleep(5)
+                await ctx.clear_reactions()
 
 
 @bot.command()
-async def errordesc(ctx, code, *desc):
-    if "errors" in state["persistent"].keys():
+async def erroredit(ctx, code, key, *desc):
+    if "errors" not in state["persistent"].keys():
         state["persistent"]["errors"] = {}
 
-    state["persistent"]["errors"][code]['desc'] = ' '.join(desc)
+    if key not in ["title", "url", "desc", "remove"]:
+        ctx.send("Invalid key to edit")
+
+    if key == "remove":
+        del state["persistent"]["errors"][code]
+        return
+
+    if code not in state["persistent"]["errors"].keys():
+        state["persistent"]["errors"][code] = {}
+
+    state["persistent"]["errors"][code][key] = ' '.join(desc)
     await saveP()
-
-
-@bot.command()
-async def errorurl(ctx, code, *url):
-    if "errors" in state["persistent"].keys():
-        state["persistent"]["errors"] = {}
-
-    state["persistent"]["errors"][code]['url'] = ' '.join(url)
-    await saveP()
-
-
-@bot.command()
-async def errortitle(ctx, code, *title):
-    if "errors" in state["persistent"].keys():
-        state["persistent"]["errors"] = {}
-
-    state["persistent"]["errors"][code]['title'] = ' '.join(title)
-    await saveP()
+    await ctx.add_reaction("🆗")
+    await asyncio.sleep(5)
+    await ctx.clear_reactions()
 
 
 @bot.command()
