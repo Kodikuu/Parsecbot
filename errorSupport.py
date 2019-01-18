@@ -77,15 +77,13 @@ class eSupport:
             if i.isdigit() or i in self.emodify.keys():
                 # If any 'word' in the message is a number, or a manual error.
                 self.run.set()
-                await self.errorProcess(message, i, False)
-                return
+                return await self.errorProcess(message, i, False)
 
     async def checkWords(self, message):
         for code in self.emodify.keys():
             if code.lower() in message.content.lower():
                 self.run.set()
-                await self.errorProcess(message, code, False)
-                return
+                return await self.errorProcess(message, code, False)
 
     def is_admin():
         async def predicate(ctx):
