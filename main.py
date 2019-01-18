@@ -110,14 +110,14 @@ async def on_message(message):
             if i.isdigit() or i in state['persistent']['errors'].keys():
                 # If any 'word' in the message is a number, or a manual error.
                 await errorScrape()
-                await errorprocess(message, i, False)
+                await errorProcess(message, i, False)
                 return
 
         # Look for error phrases if a command isn't used.
         for code in state['persistent']['errors'].keys():
             if code.lower() in message.content.lower():
                 await errorScrape()
-                await errorprocess(message, code, False)
+                await errorProcess(message, code, False)
                 return
 
     await bot.process_commands(message)
@@ -132,10 +132,10 @@ async def saveP():
 async def error(ctx, errorcode):
     # Just makes things easier when running errorprocess not as a command.
     await errorScrape()
-    await errorprocess(ctx, errorcode, True)
+    await errorProcess(ctx, errorcode, True)
 
 
-async def errorprocess(ctx, errorcode, explicit=False):
+async def errorProcess(ctx, errorcode, explicit=False):
     def check(reaction, user):
         e = str(reaction.emoji)
         return e == '❎' or e == '✅' and not user == bot.user
