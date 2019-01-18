@@ -64,8 +64,22 @@ else:
         json.dump(state['persistent'], file)
 
 
-# Function + Event Definitions
+# Check Definitions
+def is_admin():
+    async def predicate(ctx):
+        # Is the command user Kodikuu?
+        c1 = ctx.author.id == 124207277174423552
+        # Is the command user the current bot owner?
+        c2 = ctx.author.id == bot.owner_id
+        # Does the command user have the Jedi role?
+        c3 = ctx.author.top_role.name == "Jedi"
+        # Does the command user have the Parsec Team role?
+        c4 = ctx.author.top_role.name == "Parsec Team"
+        return c1 or c2 or c3 or c4
+    return commands.check(predicate)
 
+
+# Function + Event Definitions
 async def errorScrape(url=None):
     if state['etime'] > time() - 60:
         return  # Don't repeat more than once a minute
@@ -210,6 +224,7 @@ async def errorResponse(ctx, error, explicit=False):
 
 
 @bot.command()
+@is_admin()
 async def erroredit(ctx, code, key, *desc):
     if "errors" not in state["persistent"].keys():
         state["persistent"]["errors"] = {}
@@ -238,13 +253,14 @@ async def latency(ctx):
 
 
 @bot.command(description='Restart the bot.')
+@is_admin()
 async def restart(ctx):
     await ctx.send('Restarting.')
     exit()
 
 
 @bot.command(description='Shut down the bot.', hidden=True)
-@commands.is_owner()
+@is_admin()
 async def quit(ctx):
     await ctx.send('Shutting Down.')
     state['state'] = 'shutdown'
