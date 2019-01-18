@@ -103,13 +103,23 @@ async def on_message(message):
     if message.author == bot.user:
         return
 
-    # Look for error codes if a command isn't used.
     if not (message.content.startswith(">") or bot.user in message.mentions):
+        # Look for error codes if a command isn't used.
         tmp = message.content.split()
         for i in tmp:
-            if i.isdigit():  # If any 'word' in the message is a number.
+            if i.isdigit() or i in state['persistent']['errors'].keys():
+                # If any 'word' in the message is a number, or a manual error.
                 await errorScrape()
                 await errorprocess(message, i, False)
+                return
+
+        # Look for error phrases if a command isn't used.
+        for code in state['persistent']['errors'].keys():
+            if code.lower() in message.content.lower():
+                await errorScrape()
+                await errorprocess(message, code, False)
+                return
+
     await bot.process_commands(message)
 
 
