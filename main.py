@@ -171,7 +171,7 @@ async def errorProcess(ctx, ecode, explicit=False):
         else:
             if explicit:
                 desc = "Please contact staff or correct your error code."
-                emb = Embed(title=f"{ecode} Not Documented.",
+                emb = Embed(title=f"{ecode}: Not Documented.",
                             description=desc,
                             timestamp=datetime.datetime.now(),
                             color=Color.dark_red())
