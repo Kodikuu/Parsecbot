@@ -166,7 +166,7 @@ class eSupport:
         # Ensure error is complete, input placeholders if not
         for key in ["title", "desc", "url"]:
             if key not in error.keys():
-                error[key] = ""
+                error[key] = None
 
         await self.errorResponse(ctx, error, explicit)
         return True
@@ -178,11 +178,17 @@ class eSupport:
 
         # Output error immediately if explicit.
         if explicit:
-            rembed = Embed(title=error['title'],
-                           description=error['desc'],
-                           url=error['url'],
-                           timestamp=datetime.now(),
-                           color=Color.dark_red())
+            if error['url'] is not None:
+                rembed = Embed(title=error['title'],
+                               description=error['desc'],
+                               url=error['url'],
+                               timestamp=datetime.now(),
+                               color=Color.dark_red())
+            else:
+                rembed = Embed(title=error['title'],
+                               description=error['desc'],
+                               timestamp=datetime.now(),
+                               color=Color.dark_red())
             await ctx.channel.send(embed=rembed)
 
         else:  # Go through steps if not explicit
@@ -198,11 +204,17 @@ class eSupport:
                 await ctx.clear_reactions()
                 if str(reaction.emoji) == '✅':
                     await ctx.add_reaction("🆗")
-                    rembed = Embed(title=error['title'],
-                                   description=error['desc'],
-                                   url=error['url'],
-                                   timestamp=datetime.now(),
-                                   color=Color.dark_red())
+                    if error['url'] is not None:
+                        rembed = Embed(title=error['title'],
+                                       description=error['desc'],
+                                       url=error['url'],
+                                       timestamp=datetime.now(),
+                                       color=Color.dark_red())
+                    else:
+                        rembed = Embed(title=error['title'],
+                                       description=error['desc'],
+                                       timestamp=datetime.now(),
+                                       color=Color.dark_red())
                     await ctx.channel.send(embed=rembed)
                     await asyncio.sleep(5)
                     await ctx.clear_reactions()
