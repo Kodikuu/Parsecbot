@@ -74,6 +74,8 @@ class eSupport:
     async def checkNums(self, message):
         tmp = message.content.split()
         for i in tmp:
+            if i.startswith("-"):
+                i = i[1:]
             if i.isdigit() or i in self.emodify.keys():
                 # If any 'word' in the message is a number, or a manual error.
                 self.run.set()
