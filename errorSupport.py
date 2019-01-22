@@ -79,7 +79,6 @@ class eSupport:
                 self.run.set()
                 return await self.errorProcess(message, i, False)
 
-    async def checkWords(self, message):
         for code in self.emodify.keys():
             if code.lower() in message.content.lower():
                 self.run.set()

@@ -94,8 +94,6 @@ async def on_message(message):
         # Look for error codes if a command isn't used.
         if await eSupport.checkNums(message):
             return
-        if await eSupport.checkWords(message):
-            return
 
         # Implement basic anti-spam
 
