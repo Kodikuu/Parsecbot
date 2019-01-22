@@ -129,6 +129,10 @@ class eSupport:
         await ctx.message.clear_reactions()
 
     async def errorProcess(self, ctx, ecode, explicit=False):
+        # Remove leading negatives (Some users put them with the number)
+        if ecode.startswith("-"):
+            ecode = ecode[1:]
+
         # Get scraped error
         error = None
         for e in self.elist:
