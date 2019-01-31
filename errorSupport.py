@@ -54,7 +54,7 @@ class eSupport:
             for i in data:
                 tl = {}
 
-                v = "https://support.parsecgaming.com" + i.split("\"")[1][:31]
+                v = "https://support.parsecgaming.com" + i.split("\"")[3][:31]
                 tl['url'] = v
 
                 tmp = i.split(">")[1].split("<")[0].replace("&#39;", "'")
