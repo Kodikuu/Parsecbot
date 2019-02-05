@@ -1,4 +1,4 @@
-# Core Requirements
+# Core Requirements.
 from discord.ext import commands
 from discord import Activity, ActivityType, AppInfo
 import asyncio
