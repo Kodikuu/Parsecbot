@@ -95,8 +95,10 @@ class eSupport:
             # Does the command user have the Jedi role?
             c3 = ctx.author.top_role.name == "Jedi"
             # Does the command user have the Parsec Team role?
-            c4 = ctx.author.top_role.name == "Parsec Team"
-            return c1 or c2 or c3 or c4
+            c4 = ctx.author.top_role.name == "Admin"
+            c5 = ctx.author.top_role.name == "Parsec Team"
+            c6 = ctx.author.top_role.name == "Dark Dide"
+            return c1 or c2 or c3 or c4 or c5 or c6
         return commands.check(predicate)
 
     @commands.command()
