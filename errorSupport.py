@@ -5,7 +5,6 @@ import requests
 from time import time
 import json
 from os import path
-from datetime import datetime
 
 
 class eSupport:
@@ -17,6 +16,7 @@ class eSupport:
         self.elist = []
         self.emodify = {}
         self.task = self.bot.loop.create_task(self.scrapeTask())
+        self.color = Color(0x5c5cff)
 
         self.run.set()
 
@@ -161,8 +161,7 @@ class eSupport:
                     desc = "Please contact staff or correct your error code."
                     emb = Embed(title=f"{ecode}: Not Documented.",
                                 description=desc,
-                                timestamp=datetime.now(),
-                                color=Color.dark_red())
+                                color=self.color)
                     await ctx.channel.send(embed=emb)
                 return  # No error found
 
@@ -185,13 +184,11 @@ class eSupport:
                 rembed = Embed(title=error['title'],
                                description=error['desc'],
                                url=error['url'],
-                               timestamp=datetime.now(),
-                               color=Color.dark_red())
+                               color=self.color)
             else:
                 rembed = Embed(title=error['title'],
                                description=error['desc'],
-                               timestamp=datetime.now(),
-                               color=Color.dark_red())
+                               color=self.color)
             await ctx.channel.send(embed=rembed)
 
         else:  # Go through steps if not explicit
@@ -211,13 +208,11 @@ class eSupport:
                         rembed = Embed(title=error['title'],
                                        description=error['desc'],
                                        url=error['url'],
-                                       timestamp=datetime.now(),
-                                       color=Color.dark_red())
+                                       color=self.color)
                     else:
                         rembed = Embed(title=error['title'],
                                        description=error['desc'],
-                                       timestamp=datetime.now(),
-                                       color=Color.dark_red())
+                                       color=self.color)
                     await ctx.channel.send(embed=rembed)
                     await asyncio.sleep(5)
                     await ctx.clear_reactions()
