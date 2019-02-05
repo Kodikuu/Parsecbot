@@ -11,12 +11,6 @@ import asyncio
 import json
 from os import path
 
-# Timers
-from time import time
-
-# Error code scraping
-import requests
-
 # Additional Requirements
 import errorSupport
 
