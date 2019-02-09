@@ -128,7 +128,7 @@ class eSupport:
                 self.emodify[code][key] = ' '.join(desc)
 
         else:
-            ctx.send("Invalid key to edit")
+            await ctx.send("Invalid key to edit")
             return
 
         self.save()
