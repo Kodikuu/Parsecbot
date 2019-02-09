@@ -118,7 +118,7 @@ class eSupport:
     @is_admin()
     async def erroredit(self, ctx, code, key, *desc):
 
-        if key not in ["title", "url", "desc", "remove"]:
+        if key in ["title", "url", "desc", "remove"]:
             if code not in self.emodify.keys():
                 self.emodify[code] = {}
 
