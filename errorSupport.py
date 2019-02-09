@@ -119,15 +119,18 @@ class eSupport:
     async def erroredit(self, ctx, code, key, *desc):
 
         if key not in ["title", "url", "desc", "remove"]:
-            ctx.send("Invalid key to edit")
+            if code not in self.emodify.keys():
+                self.emodify[code] = {}
 
-        if code not in self.emodify.keys():
-            self.emodify[code] = {}
+            if key == "remove":
+                del self.emodify[code]
+            else:
+                self.emodify[code][key] = ' '.join(desc)
 
-        if key == "remove":
-            del self.emodify[code]
         else:
-            self.emodify[code][key] = ' '.join(desc)
+            ctx.send("Invalid key to edit")
+            return
+
         self.save()
         await ctx.message.add_reaction("🆗")
         await asyncio.sleep(5)
@@ -202,7 +205,7 @@ class eSupport:
             await ctx.add_reaction(emoji_no)
             try:
                 reaction, user = await self.bot.wait_for('reaction_add',
-                                                         timeout=60.0,
+                                                         timeout=120.0,
                                                          check=check)
             except asyncio.TimeoutError:
                 await ctx.clear_reactions()
