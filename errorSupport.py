@@ -117,6 +117,7 @@ class eSupport:
     @commands.command()
     @is_admin()
     async def erroredit(self, ctx, code, key, *desc):
+        key = key.lower()
 
         if key in ["title", "url", "desc", "remove"]:
             if code not in self.emodify.keys():
