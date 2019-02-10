@@ -179,8 +179,8 @@ class eSupport:
     async def errorResponse(self, ctx, error, explicit=False):
         # Attempt to retrieve custom emojis, else use non-custom emojis
         elist = ctx.guild.emojis
-        emoji_yes = utils.get(elist, name="show_supportBotMessage") or '✅'
-        emoji_no = utils.get(elist, name="dontShow_supportBotMessage") or '❎'
+        emoji_yes = utils.get(elist, name="supportBotMessage_show") or '✅'
+        emoji_no = utils.get(elist, name="supportBotMessage_dontShow") or '❎'
 
         def check(reaction, user):
             e = reaction.emoji
