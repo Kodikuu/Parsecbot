@@ -1,5 +1,5 @@
 from discord.ext import commands
-from discord import Color, Embed
+from discord import Color, Embed, utils
 import asyncio
 import requests
 from time import time
@@ -117,17 +117,21 @@ class eSupport:
     @commands.command()
     @is_admin()
     async def erroredit(self, ctx, code, key, *desc):
+        key = key.lower()
 
-        if key not in ["title", "url", "desc", "remove"]:
-            ctx.send("Invalid key to edit")
+        if key in ["title", "url", "desc", "remove"]:
+            if code not in self.emodify.keys():
+                self.emodify[code] = {}
 
-        if code not in self.emodify.keys():
-            self.emodify[code] = {}
+            if key == "remove":
+                del self.emodify[code]
+            else:
+                self.emodify[code][key] = ' '.join(desc)
 
-        if key == "remove":
-            del self.emodify[code]
         else:
-            self.emodify[code][key] = ' '.join(desc)
+            await ctx.send("Invalid key to edit")
+            return
+
         self.save()
         await ctx.message.add_reaction("🆗")
         await asyncio.sleep(5)
@@ -174,9 +178,15 @@ class eSupport:
         return True
 
     async def errorResponse(self, ctx, error, explicit=False):
+        # Attempt to retrieve custom emojis, else use non-custom emojis
+        elist = ctx.guild.emojis
+        emoji_yes = utils.get(elist, name="supportBotMessage_show") or '✅'
+        emoji_no = utils.get(elist, name="supportBotMessage_dontShow") or '❎'
+
         def check(reaction, user):
-            e = str(reaction.emoji)
-            return e == '❎' or e == '✅' and not user == self.bot.user
+            e = reaction.emoji
+
+            return e in (emoji_yes, emoji_no) and not user == self.bot.user
 
         # Output error immediately if explicit.
         if explicit:
@@ -192,17 +202,17 @@ class eSupport:
             await ctx.channel.send(embed=rembed)
 
         else:  # Go through steps if not explicit
-            await ctx.add_reaction("❎")
-            await ctx.add_reaction("✅")
+            await ctx.add_reaction(emoji_yes)
+            await ctx.add_reaction(emoji_no)
             try:
                 reaction, user = await self.bot.wait_for('reaction_add',
-                                                         timeout=60.0,
+                                                         timeout=120.0,
                                                          check=check)
             except asyncio.TimeoutError:
                 await ctx.clear_reactions()
             else:
                 await ctx.clear_reactions()
-                if str(reaction.emoji) == '✅':
+                if reaction.emoji == emoji_yes:
                     await ctx.add_reaction("🆗")
                     if error['url'] is not None:
                         rembed = Embed(title=error['title'],
