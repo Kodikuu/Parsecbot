@@ -89,6 +89,12 @@ async def on_message(message):
         if await eSupport.checkNums(message):
             return
 
+        # Good Bot. Bad Bot.
+        if "good bot" in message.content.lower():
+            await message.channel.send("I do my best :D")
+        elif "bad bot" in message.content.lower():
+            await message.channel.send("I blame Kodikuu. All his fault.")
+
         # Implement basic anti-spam
 
     await bot.process_commands(message)
