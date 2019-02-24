@@ -7,7 +7,7 @@ import json
 from os import path
 
 
-class eSupport:
+class eSupport(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
