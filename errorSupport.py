@@ -5,9 +5,10 @@ import requests
 from time import time
 import json
 from os import path
+import re
 
 
-class eSupport(commands.Cog):
+class eSupport(commands.Cog, name="Support"):
 
     def __init__(self, bot):
         self.bot = bot
@@ -71,27 +72,42 @@ class eSupport(commands.Cog):
             self.time = time()
             self.run.clear()
 
-    async def checkNums(self, message):
-        tmp = message.content.split()
-        for i in tmp:
-            if i.startswith("-"):
-                i = i[1:]
-            if i.isdigit() or i in self.emodify.keys():
-                # If any 'word' in the message is a number, or a manual error.
-                self.run.set()
-                return await self.errorProcess(message, i, False)
+    async def checkMessage(self, message):
+        # Regex to grab numbers in message,
+        # doesn't care about surrounding characters
+        nums = [int(a) for a in re.findall(r'\d+', message.content)]
+        print(message.content, nums)
 
+        # Compile a list of matched codes, eventually respond to entire list.
+        matched = []
+
+        # Check if a scraped code is present
+        for error in self.elist:
+            for code in error['code']:
+                if int(code) in nums:
+                    matched.append(code)
+
+        # Check if a modified code is present
         for code in self.emodify.keys():
-            if code.lower() in message.content.lower():
-                self.run.set()
-                return await self.errorProcess(message, code, False)
+            # Duplicates are bad
+            if code not in matched:
+                # If a numeric code is found in nums
+                if code.isdigit() and int(code) in nums:
+                    matched.append(code)
+
+                # If a non-numeric code is found in message.content
+                elif not code.isdigit() and code in message.content:
+                    matched.append(code)
+
+        # For now, only act on the first code (until Process is rewritten)
+        return await self.errorProcess(message, matched, False)
 
     def is_admin():
         async def predicate(ctx):
             # Is the command user Kodikuu?
             c1 = ctx.author.id == 124207277174423552
             # Is the command user the current bot owner?
-            c2 = ctx.bot.is_owner(ctx.author)
+            c2 = await ctx.bot.is_owner(ctx.author)
             # Does the command user have the Jedi role?
             c3 = ctx.author.top_role.name == "Jedi"
             # Does the command user have the Parsec Team role?
@@ -137,47 +153,66 @@ class eSupport(commands.Cog):
         await asyncio.sleep(5)
         await ctx.message.clear_reactions()
 
-    async def errorProcess(self, ctx, ecode, explicit=False):
-        # Remove leading negatives (Some users put them with the number)
-        if ecode.startswith("-"):
-            ecode = ecode[1:]
+    async def errorProcess(self, ctx, matched, explicit=False):
 
-        # Get scraped error
-        error = None
-        for e in self.elist:
-            if error is not None:
-                break
-            for code in e['code']:
-                if ecode == code:
-                    error = e
-                    # Correct error with persistent modifications.
-                    if ecode in self.emodify.keys():
-                        for key in self.emodify[ecode].keys():
-                            error[key] = self.emodify[ecode][key]
-                    break
-        else:
-            # Search through persistence data for manually added key
-            if ecode in self.emodify.keys():
-                error = self.emodify[ecode]
+        errors = []
+
+        # Match all found codes
+        for code in matched:
+            done = False
+
+            # First, scraped errors
+            for e in self.elist:
+                for ecode in e['code']:
+                    if ecode == code:
+                        errors.append(e)
+                        # Correct error with persistent modifications.
+                        if ecode in self.emodify.keys():
+                            for key in self.emodify[ecode].keys():
+                                errors[-1][key] = self.emodify[ecode][key]
+                        done = True
+                        break
 
             else:
+                # Second, manual errors. If not already found ('done')
+                if code in self.emodify.keys() and not done:
+                    errors.append(self.emodify(code))
+
+        else:
+            # Third, if no code is found
+            if len(errors) == 0:
+                # No code found, explicit request
                 if explicit:
                     desc = "Please contact staff or correct your error code."
                     emb = Embed(title=f"{ecode}: Not Documented.",
                                 description=desc,
                                 color=self.color)
                     await ctx.channel.send(embed=emb)
-                return  # No error found
+
+                else:
+                    # No code found, not an explicit request
+                    return False
 
         # Ensure error is complete, input placeholders if not
-        for key in ["title", "desc", "url"]:
-            if key not in error.keys():
-                error[key] = None
+        final = []
+        for error in errors:
+            for key in ["title", "desc", "url"]:
+                if key not in error.keys():
+                    error[key] = None
+            final.append(error)
 
-        await self.errorResponse(ctx, error, explicit)
+        # Construct the final embeds
+        embeds = []
+        for e in final:
+            embeds.append(Embed(title=e['title'],
+                                url=e['url'],
+                                description=e['desc'],
+                                color=self.color))
+
+        await self.errorResponse(ctx, embeds, explicit)
         return True
 
-    async def errorResponse(self, ctx, error, explicit=False):
+    async def errorResponse(self, ctx, embeds, explicit=False):
         # Attempt to retrieve custom emojis, else use non-custom emojis
         elist = ctx.guild.emojis
         emoji_yes = utils.get(elist, name="supportBotMessage_show") or '✅'
@@ -190,16 +225,8 @@ class eSupport(commands.Cog):
 
         # Output error immediately if explicit.
         if explicit:
-            if error['url'] is not None:
-                rembed = Embed(title=error['title'],
-                               description=error['desc'],
-                               url=error['url'],
-                               color=self.color)
-            else:
-                rembed = Embed(title=error['title'],
-                               description=error['desc'],
-                               color=self.color)
-            await ctx.channel.send(embed=rembed)
+            for embed in embeds:
+                await ctx.channel.send(embed=embed)
 
         else:  # Go through steps if not explicit
             await ctx.add_reaction(emoji_yes)
@@ -214,15 +241,7 @@ class eSupport(commands.Cog):
                 await ctx.clear_reactions()
                 if reaction.emoji == emoji_yes:
                     await ctx.add_reaction("🆗")
-                    if error['url'] is not None:
-                        rembed = Embed(title=error['title'],
-                                       description=error['desc'],
-                                       url=error['url'],
-                                       color=self.color)
-                    else:
-                        rembed = Embed(title=error['title'],
-                                       description=error['desc'],
-                                       color=self.color)
-                    await ctx.channel.send(embed=rembed)
+                    for embed in embeds:
+                        await ctx.channel.send(embed=embed)
                     await asyncio.sleep(5)
                     await ctx.clear_reactions()

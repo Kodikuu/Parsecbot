@@ -65,7 +65,7 @@ def is_admin():
         # Is the command user Kodikuu?
         c1 = ctx.author.id == 124207277174423552
         # Is the command user the current bot owner?
-        c2 = bot.is_owner(ctx.author)
+        c2 = await bot.is_owner(ctx.author)
         # Does the command user have the Jedi role?
         c3 = ctx.author.top_role.name == "Jedi"
         # Does the command user have the Parsec Team role?
@@ -86,7 +86,7 @@ async def on_message(message):
     # Anything that isn't a command goes inside this 'if' statement.
     if not (message.content.startswith(">") or bot.user in message.mentions):
         # Look for error codes if a command isn't used.
-        if await eSupport.checkNums(message):
+        if await eSupport.checkMessage(message):
             return
 
         # Good Bot. Bad Bot.
