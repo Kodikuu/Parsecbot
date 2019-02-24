@@ -176,7 +176,7 @@ class eSupport(commands.Cog, name="Support"):
             else:
                 # Second, manual errors. If not already found ('done')
                 if code in self.emodify.keys() and not done:
-                    errors.append(self.emodify(code))
+                    errors.append(self.emodify[code])
 
         else:
             # Third, if no code is found
