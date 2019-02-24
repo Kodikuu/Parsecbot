@@ -76,7 +76,6 @@ class eSupport(commands.Cog, name="Support"):
         # Regex to grab numbers in message,
         # doesn't care about surrounding characters
         nums = [int(a) for a in re.findall(r'\d+', message.content)]
-        print(message.content, nums)
 
         # Compile a list of matched codes, eventually respond to entire list.
         matched = []
