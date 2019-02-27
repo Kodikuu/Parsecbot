@@ -127,7 +127,7 @@ async def latency(ctx):
 @is_admin()
 async def restart(ctx):
     await ctx.send('Restarting.')
-    exit()
+    exit(0x79)
 
 
 @bot.command(description='Shut down the bot.', hidden=True)
