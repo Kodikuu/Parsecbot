@@ -49,11 +49,8 @@ class DynamicVoice(commands.Cog):
 
         # Sort channels.
         for channel in category.channels:
-            print(channel.name, channel.user_limit)
             Channels[channel.user_limit].append(channel)
 
-        print(Channels)
-        print(len(Channels.keys()))
         for limit in Channels.keys():
             cList = Channels[limit]
 
