@@ -2,6 +2,7 @@
 from discord.ext import commands
 from discord import Activity, ActivityType, AppInfo
 import asyncio
+import subprocess
 
 # Uncomment this with a full IDE, it should warn that it's not in use
 # The idea being that we never import EVERYTHING. We don't need it all
@@ -118,9 +119,12 @@ async def saveP():
 
 
 @bot.command()
-async def latency(ctx):
-    val = round(bot.latency, 5)
-    await ctx.send(f'Latency: {val}ms')
+@commands.is_owner()
+async def update(ctx):
+    await ctx.send('Attempting to update.')
+    code = subprocess.call(["git", "pull"])
+    await ctx.send(f"Finished update with exit code {code}. Restarting.")
+    await restart(ctx)
 
 
 @bot.command(description='Restart the bot.')
