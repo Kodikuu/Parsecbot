@@ -124,7 +124,8 @@ async def update(ctx):
     await ctx.send('Attempting to update.')
     code = subprocess.call(["git", "pull"])
     await ctx.send(f"Finished update with exit code {code}. Restarting.")
-    await restart(ctx)
+    await ctx.send('Restarting.')
+    exit()
 
 
 @bot.command(description='Restart the bot.')
