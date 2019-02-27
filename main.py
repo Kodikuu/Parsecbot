@@ -13,6 +13,7 @@ from os import path
 
 # Additional Requirements
 import errorSupport
+import DynamicVoice
 
 # Pre-start configuration and token loading
 if path.exists('core.private') and path.isfile('core.private'):
@@ -147,6 +148,9 @@ async def quit_error(ctx, error):
 # Initialise module classes
 eSupport = errorSupport.eSupport(bot)
 bot.add_cog(eSupport)
+
+dVoice = DynamicVoice.DynamicVoice(bot)
+bot.add_cog(dVoice)
 
 # Register tasks
 
