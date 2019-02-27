@@ -96,7 +96,7 @@ async def on_message(message):
 
         # Good Bot. Bad Bot.
         if "good bot" in message.content.lower():
-            await message.channel.send("I do my best :D")
+            await message.channel.send("I do my best 😄")
         elif "bad bot" in message.content.lower():
             await message.channel.send("I blame Kodikuu. All his fault.")
 
