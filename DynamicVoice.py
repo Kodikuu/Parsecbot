@@ -57,9 +57,11 @@ class DynamicVoice(commands.Cog):
             position = Channels[limit][0].position
             createText = f"DynamicVoice - No empty {limit} Player channel"
             deleteText = "DynamicVoice - Too many Channels"
+            name = f"{limit} Players"
 
-            if not limit:
+            if limit == 0:
                 createText = "DynamicVoice - No empty Unlimited Player channel"
+                name = "Unlimited Players"
 
             empty = []
             for channel in cList:
@@ -67,7 +69,7 @@ class DynamicVoice(commands.Cog):
                     empty.append(channel)
 
             if not empty:
-                await guild.create_voice_channel(f"{limit} Players",
+                await guild.create_voice_channel(name,
                                                  category=category,
                                                  user_limit=limit,
                                                  position=position,
