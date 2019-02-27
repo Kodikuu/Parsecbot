@@ -123,7 +123,10 @@ async def saveP():
 async def update(ctx):
     await ctx.send('Attempting to update.')
     code = subprocess.call(["git", "pull"])
-    await ctx.send(f"Finished update with exit code {code}. Restarting.")
+    if code == 0:
+        await ctx.send(f"Finished update with exit code {code}. Restarting.")
+    else:
+        await ctx(f"Update resulted in code {code}. Not restarting.")
     exit()
 
 
