@@ -124,7 +124,7 @@ class eSupport(commands.Cog, name="Support"):
         self.run.set()
 
     @commands.command()
-    async def error(self, ctx, errorcode):
+    async def error(self, ctx, *errorcode):
         # Just makes things easier when running errorprocess not as a command.
         self.run.set()
         await self.errorProcess(ctx, errorcode, True)
