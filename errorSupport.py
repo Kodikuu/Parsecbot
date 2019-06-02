@@ -125,9 +125,12 @@ class eSupport(commands.Cog, name="Support"):
 
     @commands.command()
     async def error(self, ctx, *errorcode):
+        # Ensure that the passed argument is a single string in a list/tuple
+        code = " ".join(errorcode)
+        code = (code, )
         # Just makes things easier when running errorprocess not as a command.
         self.run.set()
-        await self.errorProcess(ctx, errorcode, True)
+        await self.errorProcess(ctx, code, True)
 
     @commands.command()
     @is_admin()
@@ -183,7 +186,7 @@ class eSupport(commands.Cog, name="Support"):
                 # No code found, explicit request
                 if explicit:
                     desc = "Please contact staff or correct your error code."
-                    emb = Embed(title=f"{ecode}: Not Documented.",
+                    emb = Embed(title=f"{matched[0]}: Not Documented.",
                                 description=desc,
                                 color=self.color)
                     await ctx.channel.send(embed=emb)
