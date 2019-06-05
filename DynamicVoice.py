@@ -74,5 +74,3 @@ class DynamicVoice(commands.Cog):
                 except errors.NotFound:
                     # This error is fine
                     pass
-                else:
-                    raise
