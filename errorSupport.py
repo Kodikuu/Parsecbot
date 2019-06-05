@@ -105,8 +105,8 @@ class eSupport(commands.Cog, name="Support"):
     def is_admin():
         async def predicate(ctx):
             # Is the command user trusted?
-            roles = ["Jedi", "Parsec Team"]
-            return any([x in [y.name for y in ctx.author.roles] for x in roles])
+            role = ["Jedi", "Parsec Team"]
+            return any([x in [y.name for y in ctx.author.roles] for x in role])
         return commands.check(predicate)
 
     @commands.command()
