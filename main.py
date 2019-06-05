@@ -1,6 +1,6 @@
 # Core Requirements.
 from discord.ext import commands
-from discord import Activity, ActivityType, AppInfo
+from discord import Activity, ActivityType, AppInfo, Embed
 import asyncio
 import subprocess
 
@@ -116,6 +116,31 @@ async def on_command_error(ctx, error):
 async def saveP():
     with open('persistence.private', 'w') as file:
         json.dump(state['persistent'], file)
+
+
+# Commands
+@bot.command()
+async def tldr(ctx):
+    embed = Embed(title="TL;DR: What is Parsec?", color=0x5c5cff)
+    embed.description = (
+        "Think of Parsec like a fast screen-sharing software where your "
+        "friend's controller acts as if it were plugged into your PC "
+        "locally. In other words, it's as if your friend was "
+        "**right next to you** looking at your screen and with his own "
+        "controller."
+        "\n\n"
+        "This will work any game, emulator or program where your "
+        "friend's controller is used, like split-screen games."
+        "\n\n"
+        "This doesn't work like Hamachi, where you're supposed to have 2 "
+        "different games/PCs, one connecting to the other via LAN or "
+        "something.")
+
+    text = (
+        "Parsec is intended to make it easier for you to play the games "
+        "you love, whether with friends or alone.")
+
+    await ctx.send(text, embed=embed)
 
 
 @bot.command()
