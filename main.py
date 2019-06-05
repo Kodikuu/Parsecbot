@@ -70,6 +70,13 @@ def is_admin():
     return commands.check(predicate)
 
 
+def can_update():
+    async def predicate(ctx):
+        c1 = await ctx.bot.is_owner(ctx.author)
+        c2 = ctx.author.id in [275729136876519426, 206566115466280960]
+        return c1 or c2
+
+
 # Background Tasks
 
 # Function + Event Definitions
@@ -135,7 +142,7 @@ async def tldr(ctx):
 
 
 @bot.command()
-@commands.is_owner()
+@can_update()
 async def update(ctx):
     await ctx.send('Attempting to update.')
     code = subprocess.call(["git", "pull"])
