@@ -64,18 +64,9 @@ else:
 # Check Definitions
 def is_admin():
     async def predicate(ctx):
-        # Is the command user Kodikuu?
-        c1 = ctx.author.id == 124207277174423552
-        # Is the command user the current bot owner?
-        c2 = await ctx.bot.is_owner(ctx.author)
-        # Does the command user have the Jedi role?
-        c3 = ctx.author.top_role.name == "Jedi"
-        # Does the command user have the Parsec Team role?
-        c4 = ctx.author.top_role.name == "Admin"
-        c5 = ctx.author.top_role.name == "Parsec Team"
-        c6 = ctx.author.top_role.name == "Dark Side"
-        c7 = ctx.author.top_role.name == "Engineering"
-        return c1 or c2 or c3 or c4 or c5 or c6 or c7
+        # Is the command user trusted?
+        role = ["Jedi", "Parsec Team"]
+        return any([x in [y.name for y in ctx.author.roles] for x in role])
     return commands.check(predicate)
 
 
