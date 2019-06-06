@@ -214,8 +214,11 @@ class eSupport(commands.Cog, name="Support"):
 
         def check(reaction, user):
             e = reaction.emoji
+            c1 = e in (emoji_yes, emoji_no)
+            c2 = not user == self.bot.user
+            c3 = reaction.message == ctx
 
-            return e in (emoji_yes, emoji_no) and not user == self.bot.user
+            return c1 and c2 and c3
 
         # Output error immediately if explicit.
         if explicit:
