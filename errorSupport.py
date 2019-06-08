@@ -206,9 +206,8 @@ class eSupport(commands.Cog, name="Support"):
         emoji_no = utils.get(elist, name="supportBotMessage_dontShow") or '❎'
 
         def check(reaction, user):
-            e = reaction.emoji
-            c1 = e in (emoji_yes, emoji_no)
-            c2 = not user == self.bot.user
+            c1 = reaction.emoji in (emoji_yes, emoji_no)
+            c2 = user != self.bot.user
             c3 = reaction.message == ctx
 
             return c1 and c2 and c3
