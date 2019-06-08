@@ -147,7 +147,7 @@ async def restart(ctx):
 
 
 @bot.command(description='Shut down the bot.', hidden=True)
-@checks.trusted()
+@checks.admin()
 async def quit(ctx):
     await ctx.send('Shutting Down.')
     state['state'] = 'shutdown'
