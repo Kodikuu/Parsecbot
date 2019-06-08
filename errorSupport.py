@@ -102,6 +102,7 @@ class eSupport(commands.Cog, name="Support"):
         # For now, only act on the first code (until Process is rewritten)
         return await self.errorProcess(message, matched, False)
 
+    @commands.cooldown(1, 10)
     @commands.command()
     @checks.trusted()
     async def scrape(self, ctx):
