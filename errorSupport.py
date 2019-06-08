@@ -6,6 +6,7 @@ from time import time
 import json
 from os import path
 import re
+import checks
 
 
 class eSupport(commands.Cog, name="Support"):
@@ -101,16 +102,8 @@ class eSupport(commands.Cog, name="Support"):
         # For now, only act on the first code (until Process is rewritten)
         return await self.errorProcess(message, matched, False)
 
-    # Check Definitions
-    def is_admin():
-        async def predicate(ctx):
-            # Is the command user trusted?
-            role = ["Jedi", "Parsec Team"]
-            return any([x in [y.name for y in ctx.author.roles] for x in role])
-        return commands.check(predicate)
-
     @commands.command()
-    @is_admin()
+    @checks.trusted()
     async def scrape(self, ctx):
         self.time = 0
         self.run.set()
@@ -125,7 +118,7 @@ class eSupport(commands.Cog, name="Support"):
         await self.errorProcess(ctx, code, True)
 
     @commands.command()
-    @is_admin()
+    @checks.trusted()
     async def erroredit(self, ctx, code, key, *desc):
         key = key.lower()
 

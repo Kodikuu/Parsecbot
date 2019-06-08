@@ -1,5 +1,6 @@
 from discord.ext import commands
 from discord import utils, errors
+import checks
 
 
 class DynamicVoice(commands.Cog):
@@ -11,20 +12,12 @@ class DynamicVoice(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # Check Definitions
-    def is_admin():
-        async def predicate(ctx):
-            # Is the command user trusted?
-            role = ["Jedi", "Parsec Team"]
-            return any([x in [y.name for y in ctx.author.roles] for x in role])
-        return commands.check(predicate)
-
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         await self.refresh()
 
     @commands.command()
-    @is_admin()
+    @checks.trusted()
     async def refreshVoice(self, ctx):
         await self.refresh()
 

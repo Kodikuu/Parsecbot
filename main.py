@@ -13,8 +13,10 @@ import json
 from os import path
 
 # Additional Requirements
+import checks
 import errorSupport
 import DynamicVoice
+
 
 # Pre-start configuration and token loading
 if path.exists('core.private') and path.isfile('core.private'):
@@ -59,23 +61,6 @@ if path.exists('persistence.private') and path.isfile('persistence.private'):
 else:
     with open('persistence.private', 'x') as file:
         json.dump(state['persistent'], file)
-
-
-# Check Definitions
-def is_admin():
-    async def predicate(ctx):
-        # Is the command user trusted?
-        role = ["Jedi", "Parsec Team"]
-        return any([x in [y.name for y in ctx.author.roles] for x in role])
-    return commands.check(predicate)
-
-
-def can_update():
-    async def predicate(ctx):
-        c1 = await ctx.bot.is_owner(ctx.author)
-        c2 = ctx.author.id in [275729136876519426, 206566115466280960]
-        return c1 or c2
-    return commands.check(predicate)
 
 
 # Background Tasks
@@ -143,7 +128,7 @@ async def tldr(ctx):
 
 
 @bot.command()
-@can_update()
+@checks.admin()
 async def update(ctx):
     await ctx.send('Attempting to update.')
     code = subprocess.call(["git", "pull"])
@@ -155,14 +140,14 @@ async def update(ctx):
 
 
 @bot.command(description='Restart the bot.')
-@is_admin()
+@checks.trusted()
 async def restart(ctx):
     await ctx.send('Restarting.')
     exit()
 
 
 @bot.command(description='Shut down the bot.', hidden=True)
-@is_admin()
+@checks.trusted()
 async def quit(ctx):
     await ctx.send('Shutting Down.')
     state['state'] = 'shutdown'
