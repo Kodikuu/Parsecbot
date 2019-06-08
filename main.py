@@ -93,7 +93,12 @@ async def on_message(message):
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CheckFailure):
         await ctx.send("You do not have permission to use that command.")
+
+    elif isinstance(error, commands.errors.CommandNotFound):
+        await ctx.send(error)
+
     else:
+        await ctx.send(error)
         raise error
 
 
