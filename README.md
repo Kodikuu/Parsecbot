@@ -2,7 +2,7 @@
 
 ## Requirements:
 - Python 3.7+
-- [Discord.py Rewrite](https://discordpy.readthedocs.io/en/rewrite/)
+- [Discord.py Rewrite](https://discordpy.readthedocs.io/en/latest/)
 - [Requests lib](https://docs.python-requests.org/en/master/)
 - A valid bot token (No token provided for security)
 
