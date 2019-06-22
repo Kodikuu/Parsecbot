@@ -182,6 +182,7 @@ class eSupport(commands.Cog, name="Support"):
                                                          check=check)
             except asyncio.TimeoutError:
                 await msg.clear_reactions()
+                break
 
             # Handle input
             if reaction.emoji == emoji_no:
