@@ -9,14 +9,29 @@ import re
 import checks
 
 
+def sorted_nicely(l):
+    """ Sort the given iterable in the way that humans expect."""
+    def convert(text): return int(text) if text.isdigit() else text
+
+    def alphanum_key(key): return [convert(c)
+                                   for c in re.split('([0-9]+)', key)]
+    return sorted(l, key=alphanum_key)
+
+
 class eSupport(commands.Cog, name="Support"):
 
     def __init__(self, bot):
         self.bot = bot
         self.time = 0
         self.run = asyncio.Event(loop=bot.loop)
+
+        # elements are {"title": "a", "code": "b", "url": "c", "desc": "d"}
         self.elist = []
+        # elements are "keyword": {"title": "a", "url": "b", "desc": "c"}
         self.emodify = {}
+        # elements are "keyword": [ts, ts, ts, ts, ...] Saved separately
+        self.tracking = {}
+
         self.task = self.bot.loop.create_task(self.scrapeTask())
         self.color = Color(0x5c5cff)
 
@@ -108,6 +123,97 @@ class eSupport(commands.Cog, name="Support"):
     async def scrape(self, ctx):
         self.time = 0
         self.run.set()
+
+    @commands.command()
+    @checks.trusted()
+    async def errorlist(self, ctx):
+        elist = ctx.guild.emojis
+        emoji_no = utils.get(elist, name="supportBotMessage_dontShow") or '❎'
+
+        tmplist = {}  # Actually a dict for now because it's easy to update
+        # Compile dict of original keys:titles
+        for item in self.elist:
+            for code in item['code']:
+                tmplist[code] = item['desc']
+
+        # Update dict with overrides and additions
+        for item in self.emodify.keys():
+            if "title" in self.emodify[item]:
+                tmplist[item] = self.emodify[item]['title']
+            else:
+                tmplist[item] = "None"
+
+        # Covnert into list of lines
+        tmplist = [f"{key} - {tmplist[key]}" for key in tmplist.keys()]
+
+        # Sort alphanumerically
+        tmplist = [a for a in sorted_nicely(set(tmplist))]
+
+        # Convert into 'pages' of string items
+        pages = [tmplist[i:i + 10] for i in range(0, len(tmplist), 10)]
+
+        # Convert each page's list into a single string
+        pages = ["\n".join(page) for page in pages]
+
+        # Set up and send modifiable embed
+        pagenum, pagecount = 1, len(pages)
+        emb = Embed(title=f"Registered Keywords.",
+                    description=pages[pagenum-1],
+                    color=self.color)
+        emb.set_footer(text=f"Page {pagenum}/{pagecount}")
+        msg = await ctx.send(embed=emb)
+
+        await msg.add_reaction("◀")
+        await msg.add_reaction("▶")
+        await msg.add_reaction(emoji_no)
+
+        def check(reaction, user):
+            c1 = user != self.bot.user
+            c2 = reaction.message.id == msg.id
+
+            return c1 and c2
+
+        # Begin wait-edit/wait-delete loop
+        while True:
+            # Await input
+            try:
+                reaction, user = await self.bot.wait_for('reaction_add',
+                                                         timeout=120.0,
+                                                         check=check)
+            except asyncio.TimeoutError:
+                await msg.clear_reactions()
+
+            # Handle input
+            if reaction.emoji == emoji_no:
+                await msg.clear_reactions()
+                break
+
+            elif reaction.emoji == "◀":
+                await msg.remove_reaction("◀", user)
+                pagenum -= 1
+                if pagenum == 0:
+                    pagenum = pagecount
+
+                emb = Embed(title=f"Registered Keywords.",
+                            description=pages[pagenum-1],
+                            color=self.color)
+                emb.set_footer(text=f"Page {pagenum}/{pagecount}")
+                await msg.edit(embed=emb)
+
+            elif reaction.emoji == "▶":
+                await msg.remove_reaction("▶", user)
+                pagenum += 1
+                if pagenum == pagecount + 1:
+                    pagenum = 1
+
+                emb = Embed(title=f"Registered Keywords.",
+                            description=pages[pagenum-1],
+                            color=self.color)
+                emb.set_footer(text=f"Page {pagenum}/{pagecount}")
+                await msg.edit(embed=emb)
+
+            else:
+                await msg.remove_reaction(reaction.emoji, user)
 
     @commands.command()
     async def error(self, ctx, *errorcode):
