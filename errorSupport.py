@@ -397,9 +397,8 @@ class eSupport(commands.Cog, name="Support"):
             return
 
         users = len(set([item["id"] for item in self.tracking[keyword]]))
-        users = [item["id"] for item in self.tracking[keyword]]
-        usercount = len(set(users))
 
-        occurrences = len(self.tracking[keyword])
+        count = len(self.tracking[keyword])
 
-        await ctx.send(f"{occurrences} counts from {usercount} unique user{'s' * (usercount != 1)}.")
+        out = f"{count} counts from {users} unique user{'s' * (users != 1)}."
+        await ctx.send(out)
