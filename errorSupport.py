@@ -156,18 +156,45 @@ class eSupport(commands.Cog, name="Support"):
         elist = ctx.guild.emojis
         emoji_no = utils.get(elist, name="supportBotMessage_dontShow") or '❎'
 
-        tmplist = {}  # Actually a dict for now because it's easy to update
-        # Compile dict of original keys:titles
-        for item in self.elist:
-            for code in item['code']:
-                tmplist[code] = item['desc']
+        role = ["Jedi", "Parsec Team"]
+        red = any([x in [y.name for y in ctx.author.roles] for x in role])
 
-        # Update dict with overrides and additions
-        for item in self.emodify.keys():
-            if "title" in self.emodify[item]:
-                tmplist[item] = self.emodify[item]['title']
-            else:
-                tmplist[item] = "None"
+        redT = red and "tracked" in args and "silent" not in args
+        redS = red and "silent" in args and "tracked" not in args
+
+        tmplist = {}  # Actually a dict for now because it's easy to update
+
+        # if "red" and asked for tracking list, go ahead and do that
+        if redT:
+            emodify = self.emodify  # Purely for PEP8 line length compliance
+            for item in emodify.keys():
+                if "track" in emodify[item] and emodify[item]["track"]:
+                    if "title" in emodify[item]:
+                        tmplist[item] = emodify[item]['title']
+                    else:
+                        tmplist[item] = "None"
+
+        elif redS:
+            emodify = self.emodify  # Purely for PEP8 line length compliance
+            for item in emodify.keys():
+                if "respond" in emodify[item] and not emodify[item]["respond"]:
+                    if "title" in emodify[item]:
+                        tmplist[item] = emodify[item]['title']
+                    else:
+                        tmplist[item] = "None"
+        # Do things normally if the tracker list hasn't been asked for
+        else:
+            # Compile dict of original keys:titles
+            for item in self.elist:
+                for code in item['code']:
+                    tmplist[code] = item['desc']
+
+            # Update dict with overrides and additions
+            for item in self.emodify.keys():
+                if "title" in self.emodify[item]:
+                    tmplist[item] = self.emodify[item]['title']
+                else:
+                    tmplist[item] = "None"
 
                     # Convert into sorted list of lines
         tmplist = sort([f"{key} - {tmplist[key]}" for key in tmplist.keys()])
@@ -180,7 +207,11 @@ class eSupport(commands.Cog, name="Support"):
 
         # Set up and send modifiable embed
         pagenum, pagecount = 1, len(pages)
-        emb = Embed(title=f"Registered Keywords.",
+        if pagecount == 0:
+            await ctx.send("None found.")
+            return
+        title = f"Registered{' Tracked'*redT}{' Silent'*redS} Keywords."
+        emb = Embed(title=title,
                     description=pages[pagenum-1],
                     color=self.color)
         emb.set_footer(text=f"Page {pagenum}/{pagecount}")
@@ -218,7 +249,7 @@ class eSupport(commands.Cog, name="Support"):
                 if pagenum == 0:
                     pagenum = pagecount
 
-                emb = Embed(title=f"Registered Keywords.",
+                emb = Embed(title=title,
                             description=pages[pagenum-1],
                             color=self.color)
                 emb.set_footer(text=f"Page {pagenum}/{pagecount}")
