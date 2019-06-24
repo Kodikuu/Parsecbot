@@ -346,7 +346,8 @@ class eSupport(commands.Cog, name="Support"):
         ts = ctx.created_at.timestamp()
         self.tracking[keyword].append({"ts": ts,
                                        "id": ctx.author.id,
-                                       "green": green})
+                                       "green": green,
+                                       "msg": ctx.content})
 
         self.save()
 
