@@ -331,7 +331,8 @@ class eSupport(commands.Cog, name="Support"):
                         description=e['desc'],
                         color=self.color) for e in final]
 
-        await self.errorResponse(ctx, embeds, explicit)
+        if embeds:
+            await self.errorResponse(ctx, embeds, explicit)
         return True
 
     async def trackingProcess(self, ctx, keyword):
