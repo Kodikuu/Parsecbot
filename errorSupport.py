@@ -7,6 +7,7 @@ import json
 from os import path
 import re
 import checks
+import datetime
 
 
 def sorted_nicely(l):
@@ -29,7 +30,7 @@ class eSupport(commands.Cog, name="Support"):
         self.elist = []
         # elements are "keyword": {"title": "a", "url": "b", "desc": "c"}
         self.emodify = {}
-        # elements are "keyword": [ts, ts, ts, ts, ...] Saved separately
+        # elements are "keyword": [{"ts": ts, "id": id, "green": True/False},]
         self.tracking = {}
 
         self.task = self.bot.loop.create_task(self.scrapeTask())
@@ -45,9 +46,20 @@ class eSupport(commands.Cog, name="Support"):
             with open('errors.private', 'w') as file:
                 json.dump(self.emodify, file)
 
+        if path.exists('tracking.json') and path.isfile('tracking.json'):
+            with open('tracking.json', 'r') as file:
+                self.tracking = json.load(file)
+                print('Loaded tracking data')
+        else:
+            with open('tracking.json', 'w') as file:
+                json.dump(self.tracking, file)
+
     def save(self):
         with open('errors.private', 'w') as file:
             json.dump(self.emodify, file)
+
+        with open('tracking.json', 'w') as file:
+            json.dump(self.tracking, file)
 
     async def scrapeTask(self):
         url = "https://support.parsecgaming.com/hc/en-us/sections/115000849851"
@@ -227,17 +239,22 @@ class eSupport(commands.Cog, name="Support"):
 
     @commands.command()
     @checks.trusted()
-    async def erroredit(self, ctx, code, key, *desc):
+    async def erroredit(self, ctx, code, key, *args):
         key = key.lower()
 
-        if key in ["title", "url", "desc", "remove"]:
+        if key in ["title", "url", "desc", "remove", "track", "respond"]:
             if code not in self.emodify.keys():
                 self.emodify[code] = {}
 
             if key == "remove":
                 del self.emodify[code]
+            elif key in ["track", "respond"]:
+                if args[0].lower() == "true":
+                    self.emodify[code][key] = True
+                elif args[0].lower() == "false":
+                    self.emodify[code][key] = False
             else:
-                self.emodify[code][key] = ' '.join(desc)
+                self.emodify[code][key] = ' '.join(args)
 
         else:
             await ctx.send("Invalid key to edit")
@@ -260,6 +277,7 @@ class eSupport(commands.Cog, name="Support"):
             for e in self.elist:
                 for ecode in e['code']:
                     if ecode == code:
+                        e['keyword'] = code  # For tracking
                         errors.append(e)
                         # Correct error with persistent modifications.
                         if ecode in self.emodify.keys():
@@ -271,7 +289,12 @@ class eSupport(commands.Cog, name="Support"):
             else:
                 # Second, manual errors. If not already found ('done')
                 if code in self.emodify.keys() and not done:
-                    errors.append(self.emodify[code])
+
+                    # For tracking
+                    newmatch = self.emodify[code]
+                    newmatch["keyword"] = code
+
+                    errors.append(newmatch)
 
         else:
             # Third, if no code is found
@@ -294,18 +317,38 @@ class eSupport(commands.Cog, name="Support"):
             for key in ["title", "desc", "url"]:
                 if key not in error.keys():
                     error[key] = None
-            final.append(error)
+
+            if "track" in error.keys() and error["track"]:
+                await self.trackingProcess(ctx, error['keyword'])
+
+            if "respond" not in error.keys() or error["respond"]:
+                final.append(error)
+
+            assert "keyword" in error.keys()
 
         # Construct the final embeds
-        embeds = []
-        for e in final:
-            embeds.append(Embed(title=e['title'],
-                                url=e['url'],
-                                description=e['desc'],
-                                color=self.color))
+        embeds = [Embed(title=e['title'],
+                        url=e['url'],
+                        description=e['desc'],
+                        color=self.color) for e in final]
 
         await self.errorResponse(ctx, embeds, explicit)
         return True
+
+    async def trackingProcess(self, ctx, keyword):
+        if keyword not in self.tracking.keys():
+            self.tracking[keyword] = []
+
+        green_roles = ["Hero", "Jedi", "Parsec Team"]
+        if any([x in [y.name for y in ctx.author.roles] for x in green_roles]):
+            green = True
+
+        ts = ctx.created_at.timestamp()
+        self.tracking[keyword].append({"ts": ts,
+                                       "id": ctx.author.id,
+                                       "green": green})
+
+        self.save()
 
     async def errorResponse(self, ctx, embeds, explicit=False):
         # Attempt to retrieve custom emojis, else use non-custom emojis
@@ -342,3 +385,21 @@ class eSupport(commands.Cog, name="Support"):
                         await ctx.channel.send(embed=embed)
                     await asyncio.sleep(5)
                     await ctx.clear_reactions()
+
+    @commands.command()
+    @checks.trusted()
+    async def tracking(self, ctx, *keyword):
+        keyword = str(" ".join(keyword))
+        print(keyword)
+
+        if keyword not in self.tracking.keys():
+            await ctx.send("No data for that keyword.")
+            return
+
+        print(self.tracking[keyword])
+        users = [item["id"] for item in self.tracking[keyword]]
+        usercount = len(set(users))
+
+        occurrences = len(self.tracking[keyword])
+
+        await ctx.send(f"{occurrences} counts from {usercount} unique user{'s' * (usercount != 1)}.")
