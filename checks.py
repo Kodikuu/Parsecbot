@@ -9,6 +9,14 @@ def trusted():
     return commands.check(predicate)
 
 
+def green():
+    async def predicate(ctx):
+        # Is the command user trusted?
+        role = ["Hero", "Jedi", "Parsec Team"]
+        return any([x in [y.name for y in ctx.author.roles] for x in role])
+    return commands.check(predicate)
+
+
 def admin():
     async def predicate(ctx):
         c1 = await ctx.bot.is_owner(ctx.author)
