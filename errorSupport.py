@@ -7,7 +7,6 @@ import json
 from os import path
 import re
 import checks
-import datetime
 
 
 def sorted_nicely(l):
