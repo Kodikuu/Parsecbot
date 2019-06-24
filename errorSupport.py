@@ -10,13 +10,14 @@ import checks
 import datetime
 
 
-def sorted_nicely(l):
+def sort(items):
+    items = set(items)
     """ Sort the given iterable in the way that humans expect."""
     def convert(text): return int(text) if text.isdigit() else text
 
     def alphanum_key(key): return [convert(c)
                                    for c in re.split('([0-9]+)', key)]
-    return sorted(l, key=alphanum_key)
+    return sorted(items, key=alphanum_key)
 
 
 class eSupport(commands.Cog, name="Support"):
@@ -168,11 +169,8 @@ class eSupport(commands.Cog, name="Support"):
             else:
                 tmplist[item] = "None"
 
-        # Covnert into list of lines
-        tmplist = [f"{key} - {tmplist[key]}" for key in tmplist.keys()]
-
-        # Sort alphanumerically
-        tmplist = [a for a in sorted_nicely(set(tmplist))]
+                    # Convert into sorted list of lines
+        tmplist = sort([f"{key} - {tmplist[key]}" for key in tmplist.keys()])
 
         # Convert into 'pages' of string items
         pages = [tmplist[i:i + 10] for i in range(0, len(tmplist), 10)]
