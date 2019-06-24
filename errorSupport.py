@@ -1,5 +1,5 @@
 from discord.ext import commands
-from discord import Color, Embed, utils
+from discord import Color, Embed, utils, File
 import asyncio
 import requests
 from time import time
@@ -414,3 +414,11 @@ class eSupport(commands.Cog, name="Support"):
 
         out = f"{count} counts from {users} unique user{'s' * (users != 1)}."
         await ctx.send(out)
+
+    @commands.command()
+    @checks.trusted()
+    async def getTracking(self, ctx):
+        if path.exists('tracking.json') and path.isfile('tracking.json'):
+            with open('tracking.json', 'r') as file:
+                await ctx.author.send(file=File(file))
+                await ctx.send(f"Check your DMs {ctx.author.mention}")
