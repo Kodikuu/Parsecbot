@@ -340,8 +340,8 @@ class eSupport(commands.Cog, name="Support"):
             self.tracking[keyword] = []
 
         green_roles = ["Hero", "Jedi", "Parsec Team"]
-        if any([x in [y.name for y in ctx.author.roles] for x in green_roles]):
-            green = True
+        green = any([x in [y.name for y in ctx.author.roles]
+                     for x in green_roles])
 
         ts = ctx.created_at.timestamp()
         self.tracking[keyword].append({"ts": ts,
