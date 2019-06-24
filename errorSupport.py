@@ -151,8 +151,8 @@ class eSupport(commands.Cog, name="Support"):
         self.run.set()
 
     @commands.command()
-    @checks.trusted()
-    async def errorlist(self, ctx):
+    @checks.green()
+    async def errorlist(self, ctx, *args):
         elist = ctx.guild.emojis
         emoji_no = utils.get(elist, name="supportBotMessage_dontShow") or '❎'
 
