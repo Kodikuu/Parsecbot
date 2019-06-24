@@ -391,13 +391,12 @@ class eSupport(commands.Cog, name="Support"):
     @checks.trusted()
     async def tracking(self, ctx, *keyword):
         keyword = str(" ".join(keyword))
-        print(keyword)
 
         if keyword not in self.tracking.keys():
             await ctx.send("No data for that keyword.")
             return
 
-        print(self.tracking[keyword])
+        users = len(set([item["id"] for item in self.tracking[keyword]]))
         users = [item["id"] for item in self.tracking[keyword]]
         usercount = len(set(users))
 
