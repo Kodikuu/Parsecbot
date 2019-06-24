@@ -261,7 +261,7 @@ class eSupport(commands.Cog, name="Support"):
                 if pagenum == pagecount + 1:
                     pagenum = 1
 
-                emb = Embed(title=f"Registered Keywords.",
+                emb = Embed(title=title,
                             description=pages[pagenum-1],
                             color=self.color)
                 emb.set_footer(text=f"Page {pagenum}/{pagecount}")
