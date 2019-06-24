@@ -4,9 +4,10 @@ import asyncio
 import requests
 from time import time
 import json
-from os import path
+from os import path, rename
 import re
 import checks
+import datetime
 
 
 def sorted_nicely(l):
@@ -37,21 +38,34 @@ class eSupport(commands.Cog, name="Support"):
 
         self.run.set()
 
-        if path.exists('errors.private') and path.isfile('errors.private'):
-            with open('errors.private', 'r') as file:
-                self.emodify = json.load(file)
-                print('Loaded error data')
-        else:
-            with open('errors.private', 'w') as file:
-                json.dump(self.emodify, file)
+        now = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        try:
+            if path.exists('errors.private') and path.isfile('errors.private'):
+                with open('errors.private', 'r') as file:
+                    self.emodify = json.load(file)
+                    print('Loaded error data')
+            else:
+                with open('errors.private', 'w') as file:
+                    json.dump(self.emodify, file)
+        except json.decoder.JSONDecodeError:
+            # We can't read the data, so we move it aside and start over.
+            print("Could not read error data, backing up and starting over.")
+            rename("errors.private", f"errors-{now}.private")
+            self.emodify = {}
 
-        if path.exists('tracking.json') and path.isfile('tracking.json'):
-            with open('tracking.json', 'r') as file:
-                self.tracking = json.load(file)
-                print('Loaded tracking data')
-        else:
-            with open('tracking.json', 'w') as file:
-                json.dump(self.tracking, file)
+        try:
+            if path.exists('tracking.json') and path.isfile('tracking.json'):
+                with open('tracking.json', 'r') as file:
+                    self.tracking = json.load(file)
+                    print('Loaded tracking data')
+            else:
+                with open('tracking.json', 'w') as file:
+                    json.dump(self.tracking, file)
+        except json.decoder.JSONDecodeError:
+            # We can't read the data, so we move it aside and start over.
+            print("Could not read tracker data, backing up and starting over.")
+            rename("tracking.json", f"tracking-{now}.json")
+            self.tracking = {}
 
     def save(self):
         with open('errors.private', 'w') as file:
