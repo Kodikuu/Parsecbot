@@ -91,13 +91,15 @@ async def on_message(message):
 
 @bot.event
 async def on_command_error(ctx, error):
+    m_bot = any([user.bot for user in ctx.message.mentions])
+
     if isinstance(error, commands.CheckFailure):
         await ctx.send("You do not have permission to use that command.")
 
-    elif isinstance(error, commands.errors.CommandNotFound):
+    elif isinstance(error, commands.errors.CommandNotFound) and not m_bot:
         await ctx.send(error)
 
-    else:
+    elif not m_bot:
         await ctx.send(error)
         raise error
 
