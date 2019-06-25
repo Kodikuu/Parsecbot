@@ -166,7 +166,34 @@ async def hero(ctx, user):
                            f"{name} is cooler than a cucumber, and greener still."])
         await ctx.send(response)
         return
+
+
+@bot.command()
+@checks.moderator()
+async def gamedev(ctx, user):
+    if user.isdigit():
+        member = utils.find(lambda m: str(m.id) == user, ctx.guild.members)
+    elif len(ctx.message.mentions):
+        member = ctx.message.mentions[0]
+
+    if member is None:
+        await ctx.send(f"Could not find user {user}")
+        return False
+
+    gdev = utils.find(lambda m: m.name.lower() == "game devs", ctx.guild.roles)
+    name = member.nick or member.name
+
+    if gdev in member.roles:
+        await member.remove_roles(gdev)
+        response = choice([f"{name} decided game development was hard.", ])
         await ctx.send(response)
+
+    else:
+        await member.add_roles(gdev)
+        response = choice([f"{name} got hit by gamma radiation and turned... blue?!",
+                           f"{name} stood up the challenge, and built something awesome!",
+                           f"What kind of person is {name}? A Developer!",
+                           f"{name} is cooler than a cucumber, and... well, far bluer."])
         await ctx.send(response)
 
 
