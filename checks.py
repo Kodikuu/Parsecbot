@@ -4,7 +4,15 @@ from discord.ext import commands
 def trusted():
     async def predicate(ctx):
         # Is the command user trusted?
-        role = ["Jedi", "Parsec Team"]
+        role = ["Jedi", "Moderator", "Parsec Team"]
+        return any([x in [y.name for y in ctx.author.roles] for x in role])
+    return commands.check(predicate)
+
+
+def moderator():
+    async def predicate(ctx):
+        # Is the command user trusted?
+        role = ["Moderator", "Parsec Team"]
         return any([x in [y.name for y in ctx.author.roles] for x in role])
     return commands.check(predicate)
 
@@ -12,7 +20,7 @@ def trusted():
 def green():
     async def predicate(ctx):
         # Is the command user trusted?
-        role = ["Hero", "Jedi", "Parsec Team"]
+        role = ["Hero", "Jedi", "Moderator", "Parsec Team"]
         return any([x in [y.name for y in ctx.author.roles] for x in role])
     return commands.check(predicate)
 
