@@ -3,6 +3,7 @@ from discord.ext import commands
 from discord import Activity, ActivityType, AppInfo, Embed, utils
 import asyncio
 import subprocess
+from random import choice
 
 # Uncomment this with a full IDE, it should warn that it's not in use
 # The idea being that we never import EVERYTHING. We don't need it all
@@ -147,13 +148,24 @@ async def hero(ctx, user):
         return False
 
     hero = utils.find(lambda m: m.name.lower() == "hero", ctx.guild.roles)
+    name = member.nick or member.name
 
     if hero in member.roles:
         await member.remove_roles(hero)
-        await ctx.send(f"Removed {member} from heroes.")
+        response = choice(f"{name} has turned to a life of villainy!",
+                          f"{name} decided to retire from a life of heroism.",
+                          f"{name} lived long enough to see themselves become the villain...",
+                          f"Some kyptonite fell on {name}, they lost their powers!")
+        await ctx.send(response)
+
     else:
         await member.add_roles(hero)
-        await ctx.send(f"Added {member} to heroes!")
+        await member.remove_roles(hero)
+        response = choice(f"{name} got hit by gamma radiation and turned green!",
+                          f"{name} stood up the challenge, and came out victorious!",
+                          f"",
+                          f"Some kyptonite fell on {name}, they lost their powers!")
+        await ctx.send(response)
 
 
 @bot.command()
