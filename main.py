@@ -152,19 +152,21 @@ async def hero(ctx, user):
 
     if hero in member.roles:
         await member.remove_roles(hero)
-        response = choice(f"{name} has turned to a life of villainy!",
-                          f"{name} decided to retire from a life of heroism.",
-                          f"{name} lived long enough to see themselves become the villain...",
-                          f"Some kyptonite fell on {name}, they lost their powers!")
+        response = choice([f"{name} has turned to a life of villainy!",
+                           f"{name} decided to retire from a life of heroism.",
+                           f"{name} lived long enough to see themselves become the villain...",
+                           f"Some kyptonite fell on {name}, they lost their powers!"])
         await ctx.send(response)
 
     else:
         await member.add_roles(hero)
-        await member.remove_roles(hero)
-        response = choice(f"{name} got hit by gamma radiation and turned green!",
-                          f"{name} stood up the challenge, and came out victorious!",
-                          f"What kind of person is {name}? A Hero!",
-                          f"{name} is cooler than a cucumber, and greener still.")
+        response = choice([f"{name} got hit by gamma radiation and turned green!",
+                           f"{name} stood up the challenge, and came out victorious!",
+                           f"What kind of person is {name}? A Hero!",
+                           f"{name} is cooler than a cucumber, and greener still."])
+        await ctx.send(response)
+        return
+        await ctx.send(response)
         await ctx.send(response)
 
 
