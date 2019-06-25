@@ -1,6 +1,6 @@
 # Core Requirements.
 from discord.ext import commands
-from discord import Activity, ActivityType, AppInfo, Embed
+from discord import Activity, ActivityType, AppInfo, Embed, utils
 import asyncio
 import subprocess
 
@@ -130,6 +130,28 @@ async def tldr(ctx):
         "you love, whether with friends or alone.")
 
     await ctx.send(text, embed=embed)
+
+
+@bot.command()
+@checks.moderator()
+async def hero(ctx, user):
+    if user.isdigit():
+        member = utils.find(lambda m: str(m.id) == user, ctx.guild.members)
+    elif len(ctx.message.mentions):
+        member = ctx.message.mentions[0]
+
+    if member is None:
+        await ctx.send(f"Could not find user {user}")
+        return False
+
+    hero = utils.find(lambda m: m.name.lower() == "hero", ctx.guild.roles)
+
+    if hero in member.roles:
+        await member.remove_roles(hero)
+        await ctx.send(f"Removed {member} from heroes.")
+    else:
+        await member.add_roles(hero)
+        await ctx.send(f"Added {member} to heroes!")
 
 
 @bot.command()
