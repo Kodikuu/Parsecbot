@@ -163,8 +163,8 @@ async def hero(ctx, user):
         await member.remove_roles(hero)
         response = choice(f"{name} got hit by gamma radiation and turned green!",
                           f"{name} stood up the challenge, and came out victorious!",
-                          f"",
-                          f"Some kyptonite fell on {name}, they lost their powers!")
+                          f"What kind of person is {name}? A Hero!",
+                          f"{name} is cooler than a cucumber, and greener still.")
         await ctx.send(response)
 
 
