@@ -354,6 +354,7 @@ class eSupport(commands.Cog, name="Support"):
         # Ensure error is complete, input placeholders if not
         final = []
         for error in errors:
+            dud = not any([key in error.keys() for key in ["title", "desc"]])
             for key in ["title", "desc", "url"]:
                 if key not in error.keys():
                     error[key] = None
@@ -361,7 +362,7 @@ class eSupport(commands.Cog, name="Support"):
             if "track" in error.keys() and error["track"]:
                 await self.trackingProcess(ctx, error['keyword'])
 
-            if "respond" not in error.keys() or error["respond"]:
+            if ("respond" not in error.keys() or error["respond"]) and not dud:
                 final.append(error)
 
             assert "keyword" in error.keys()
