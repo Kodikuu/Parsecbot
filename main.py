@@ -83,6 +83,10 @@ async def on_message(message):
             await message.channel.send("I do my best 😄")
         elif "bad bot" in message.content.lower():
             await message.channel.send("I blame Kodikuu. All his fault.")
+        elif "Bargo" in message.content.lower():
+            await message.channel.send("Stop mispelling my name, thank you. -Borgo")
+        elif "named warmech" in message.content.lower():
+            await message.channel.send("Preemptive strike executed. Don't question the Warmech")
 
         # Implement basic anti-spam
 
