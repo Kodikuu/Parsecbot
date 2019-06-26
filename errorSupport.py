@@ -35,7 +35,7 @@ class eSupport(commands.Cog, name="Support"):
 
         self.color = Color(0x5c5cff)
 
-        self.run.set()
+        await self.scrapeTask()
 
         now = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         try:
