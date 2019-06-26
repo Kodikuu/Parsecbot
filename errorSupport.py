@@ -34,7 +34,6 @@ class eSupport(commands.Cog, name="Support"):
         # elements are "keyword": [{"ts": ts, "id": id, "green": True/False},]
         self.tracking = {}
 
-        self.task = self.bot.loop.create_task(self.scrapeTask())
         self.color = Color(0x5c5cff)
 
         self.run.set()
@@ -77,42 +76,39 @@ class eSupport(commands.Cog, name="Support"):
 
     async def scrapeTask(self):
         url = "https://support.parsecgaming.com/hc/en-us/sections/115000849851"
-        while True:
-            await self.run.wait()  # Wait until triggered
 
-            if self.time > time() - 60:
-                self.run.clear()
-                print("Skipping requested scrape")
-                return  # Don't repeat more than once a minute
-
-            print("Performing requested scrape")
-            r = requests.get(url)
-
-            data = []
-            for item in r.iter_lines():
-                if "Error Codes - " in str(item):
-                    data.append(str(item))
-
-            errorlist = []
-            for i in data:
-                tl = {}
-
-                v = "https://support.parsecgaming.com" + i.split("\"")[3][:31]
-                tl['url'] = v
-
-                tmp = i.split(">")[1].split("<")[0].replace("&#39;", "'")
-
-                v = [w for w in tmp.split("(")[0].split() if w.isdigit()]
-                tl['code'] = v
-
-                tl['title'] = tmp
-                tl['desc'] = tmp[len(tmp.split("(")[0])+1:-1]
-
-                errorlist.append(tl)
-            self.elist = errorlist
-
-            self.time = time()
+        if self.time > time() - 60:
             self.run.clear()
+            print("Skipping requested scrape")
+            return  # Don't repeat more than once a minute
+
+        print("Performing requested scrape")
+        r = requests.get(url)
+
+        data = []
+        for item in r.iter_lines():
+            if "Error Codes - " in str(item):
+                data.append(str(item))
+
+        errorlist = []
+        for i in data:
+            tl = {}
+
+            v = "https://support.parsecgaming.com" + i.split("\"")[3][:31]
+            tl['url'] = v
+
+            tmp = i.split(">")[1].split("<")[0].replace("&#39;", "'")
+
+            v = [w for w in tmp.split("(")[0].split() if w.isdigit()]
+            tl['code'] = v
+
+            tl['title'] = tmp
+            tl['desc'] = tmp[len(tmp.split("(")[0])+1:-1]
+
+            errorlist.append(tl)
+        self.elist = errorlist
+
+        self.time = time()
 
     async def checkMessage(self, message):
         # Regex to grab numbers in message,
@@ -148,8 +144,7 @@ class eSupport(commands.Cog, name="Support"):
     @checks.trusted()
     @checks.botsetup()
     async def scrape(self, ctx):
-        self.time = 0
-        self.run.set()
+        await self.scrapeTask()
 
     @commands.command()
     @checks.trusted()
