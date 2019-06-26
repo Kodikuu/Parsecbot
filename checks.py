@@ -31,3 +31,9 @@ def admin():
         c2 = ctx.author.id in [275729136876519426, 206566115466280960]
         return c1 or c2
     return commands.check(predicate)
+
+
+def botsetup():
+    async def predicate(ctx):
+        return ctx.channel.name.lower() == "bot-setup"
+    return commands.check(predicate)
