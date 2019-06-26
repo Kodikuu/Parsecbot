@@ -25,7 +25,6 @@ class eSupport(commands.Cog, name="Support"):
     def __init__(self, bot):
         self.bot = bot
         self.time = 0
-        self.run = asyncio.Event(loop=bot.loop)
 
         # elements are {"title": "a", "code": "b", "url": "c", "desc": "d"}
         self.elist = []
