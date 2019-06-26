@@ -453,3 +453,19 @@ class eSupport(commands.Cog, name="Support"):
             with open('tracking.json', 'r') as file:
                 await ctx.author.send(file=File(file))
                 await ctx.send(f"Check your DMs {ctx.author.mention}")
+
+    @commands.command()
+    @checks.trusted()
+    @checks.botsetup()
+    async def removetracking(self, ctx, *keyword):
+        keyword = str(" ".join(keyword))
+
+        if keyword not in self.tracking.keys():
+            await ctx.send("No data for that keyword.")
+            return
+
+        self.tracking.pop(keyword, None)
+        self.save()
+
+        out = f"All instances of keyword '{keyword}' have been removed from data."
+        await ctx.send(out)
