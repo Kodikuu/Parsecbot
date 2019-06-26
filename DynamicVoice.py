@@ -18,6 +18,7 @@ class DynamicVoice(commands.Cog):
 
     @commands.command()
     @checks.trusted()
+    @checks.botsetup()
     async def refreshVoice(self, ctx):
         await self.refresh()
 

@@ -94,6 +94,9 @@ async def on_message(message):
 async def on_command_error(ctx, error):
     m_bot = any([user.bot for user in ctx.message.mentions])
 
+    if not ctx.channel.name.lower() == "bot-setup":
+        return
+
     if isinstance(error, commands.CheckFailure):
         await ctx.send("You do not have permission to use that command.")
 
@@ -199,6 +202,7 @@ async def gamedev(ctx, user):
 
 @bot.command()
 @checks.admin()
+@checks.botsetup()
 async def update(ctx):
     await ctx.send('Attempting to update.')
     code = subprocess.call(["git", "pull"])
@@ -211,6 +215,7 @@ async def update(ctx):
 
 @bot.command(description='Restart the bot.')
 @checks.trusted()
+@checks.botsetup()
 async def restart(ctx):
     await ctx.send('Restarting.')
     exit()
@@ -218,6 +223,7 @@ async def restart(ctx):
 
 @bot.command(description='Shut down the bot.', hidden=True)
 @checks.admin()
+@checks.botsetup()
 async def quit(ctx):
     await ctx.send('Shutting Down.')
     state['state'] = 'shutdown'

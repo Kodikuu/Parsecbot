@@ -146,12 +146,13 @@ class eSupport(commands.Cog, name="Support"):
     @commands.cooldown(1, 10)
     @commands.command()
     @checks.trusted()
+    @checks.botsetup()
     async def scrape(self, ctx):
         self.time = 0
         self.run.set()
 
     @commands.command()
-    @checks.green()
+    @checks.trusted()
     async def errorlist(self, ctx, *args):
         elist = ctx.guild.emojis
         emoji_no = utils.get(elist, name="supportBotMessage_dontShow") or '❎'
@@ -271,6 +272,7 @@ class eSupport(commands.Cog, name="Support"):
                 await msg.remove_reaction(reaction.emoji, user)
 
     @commands.command()
+    @checks.botsetup()
     async def error(self, ctx, *errorcode):
         # Ensure that the passed argument is a single string in a list/tuple
         code = " ".join(errorcode)
@@ -281,6 +283,7 @@ class eSupport(commands.Cog, name="Support"):
 
     @commands.command()
     @checks.trusted()
+    @checks.botsetup()
     async def erroredit(self, ctx, code, key, *args):
         key = key.lower()
 
@@ -432,6 +435,7 @@ class eSupport(commands.Cog, name="Support"):
 
     @commands.command()
     @checks.trusted()
+    @checks.botsetup()
     async def tracking(self, ctx, *keyword):
         keyword = str(" ".join(keyword))
 
@@ -448,6 +452,7 @@ class eSupport(commands.Cog, name="Support"):
 
     @commands.command()
     @checks.trusted()
+    @checks.botsetup()
     async def getTracking(self, ctx):
         if path.exists('tracking.json') and path.isfile('tracking.json'):
             with open('tracking.json', 'r') as file:
