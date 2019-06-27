@@ -153,6 +153,8 @@ async def hero(ctx, user):
         member = utils.find(lambda m: str(m.id) == user, ctx.guild.members)
     elif len(ctx.message.mentions):
         member = ctx.message.mentions[0]
+    else:
+        await ctx.send("Please give an ID or mention the user")
 
     if member is None:
         await ctx.send(f"Could not find user {user}")
@@ -191,6 +193,8 @@ async def gamedev(ctx, user):
         member = utils.find(lambda m: str(m.id) == user, ctx.guild.members)
     elif len(ctx.message.mentions):
         member = ctx.message.mentions[0]
+    else:
+        await ctx.send("Please give an ID or mention the user")
 
     if member is None:
         await ctx.send(f"Could not find user {user}")
