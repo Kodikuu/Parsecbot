@@ -100,7 +100,7 @@ async def on_message(message):
 async def on_command_error(ctx, error):
     m_bot = any([user.bot for user in ctx.message.mentions])
 
-    if not ctx.channel.name.lower() == "bot-setup":
+    if not ctx.channel.name.lower() == "jedi":
         return
 
     if isinstance(error, commands.CheckFailure):
