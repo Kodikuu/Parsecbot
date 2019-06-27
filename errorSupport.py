@@ -8,6 +8,8 @@ from os import path, rename
 import re
 import checks
 import datetime
+from math import floor
+from io import StringIO
 
 
 def sort(items):
@@ -469,3 +471,88 @@ class eSupport(commands.Cog, name="Support"):
 
         out = f"All instances of keyword '{keyword}' have been removed from data."
         await ctx.send(out)
+
+    async def dataProcess(self, key, period, green):
+        now = time()
+        recentCount = 0
+        users = []
+        for entry in self.tracking[key]:
+            if not green and entry['green'] is True:
+                continue  # Don't pay attention to Hero+
+
+            if entry['ts'] > now - period * 86400 and green:
+                recentCount += 1
+                users.append(entry['id'])
+
+        return recentCount, len(set(users))
+
+    @commands.command()
+    @checks.trusted()
+    @checks.botsetup()
+    async def data(self, ctx, key, period: float = 30, green=True):
+        if key not in self.tracking.keys():
+            await ctx.send("No data for that keyword.")
+            return
+
+        try:
+            if period == floor(period):
+                    period = int(period)  # Avoid decimals on integers
+        except OverflowError:
+            pass
+
+        count, users = await self.dataProcess(key, period, green)
+        await ctx.send(f"{count} count{'s'*(count!=1)} from {users} user{'s'*(users!=1)} in the past {period} day{'s'*(period!=1)}")
+
+    @commands.command()
+    @checks.moderator()
+    @checks.botsetup()
+    async def report(self, ctx, green=False):
+        lines = ["key, 7C, 7U, 14C, 14U, 30C, 30U"]
+        for key in self.tracking.keys():
+            data = [key, ]
+            for period in [7, 14, 30]:
+                count, users = await self.dataProcess(key, period, green)
+                print(count, users)
+                data.append(str(count))
+                data.append(str(users))
+
+            lines.append(", ".join(data))
+
+        string = "\n".join(lines)
+        fake_file = StringIO(string)
+
+        await ctx.send(file=File(fake_file, filename="data.csv"))
+
+    @commands.command()
+    @checks.moderator()
+    @checks.botsetup()
+    async def thelp(self, ctx):
+        string = (">thelp - Get help on tracking/error commands\n\n"
+                  ">error (key) - Explicitly request info on a keyword\n\n"
+                  ">errorlist - Get a list of all registered keywords\n"
+                  ">errorlist silent - List of response=False keywords\n"
+                  ">errorlist tracked - List of tracked keywords\n\n"
+                  ">erroredit (key) title (string) - Edit embed title\n"
+                  ">erroredit (key) url (link) - Edit embed title link\n"
+                  ">erroredit (key) desc (string) - Edit embed description\n"
+                  ">erroredit (key) respond (True/False) - Respond when key "
+                  "is mentioned\n"
+                  ">erroredit (key) track (True/False) - Track key mentions\n"
+                  "\n"
+                  ">tracking (key) - Get total tracking data summary on key\n\n"
+                  ">data (key) [period=30] [green=True] - Get data info over "
+                  "'period' days, in/excluding Heroes and up\n\n"
+                  ">getTracking - Have a copy of all tracking data DM'd to you"
+                  "\n\n"
+                  ">report [green=False] - Create a report on all tracking "
+                  "data over the past 7, 14, 30 days. Exclude hero+ by default"
+                  "\n\n"
+                  ">removetracking (key) - Remove all tracking data for a key"
+                  "\n\n"
+                  "Notation: (required), [optional], [optional=withdefault]\n"
+                  "An argument can be multi-word if you put quotes around it.")
+
+        emb = Embed(title=f"Tracker/Error Help",
+                    description=string,
+                    color=self.color)
+        await ctx.send(embed=emb)
