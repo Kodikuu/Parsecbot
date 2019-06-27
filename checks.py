@@ -35,5 +35,5 @@ def admin():
 
 def botsetup():
     async def predicate(ctx):
-        return ctx.channel.name.lower() == "bot-setup"
+        return ctx.channel.name.lower() == "jedi"
     return commands.check(predicate)
