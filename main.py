@@ -85,11 +85,13 @@ async def on_message(message):
         elif "bad bot" in message.content.lower():
             await message.channel.send("I blame Kodikuu. All his fault.")
         # Don't mess with Borgo
-        elif "Bargo" in message.content.lower():
-            await message.channel.send("Stop mispelling my name, thank you. -Borgo")
+        elif "bargo" in message.content.lower():
+            await message.channel.send(("Stop mispelling my name, thank you. "
+                                        "-Borgo"))
         # Warmech is coming for you
         elif "named warmech" in message.content.lower():
-            await message.channel.send("Preemptive strike executed. Don't question the Warmech")
+            await message.channel.send(("Preemptive strike executed. Don't "
+                                        "question the Warmech"))
 
         # Implement basic anti-spam
 
@@ -163,16 +165,21 @@ async def hero(ctx, user):
         await member.remove_roles(hero)
         response = choice([f"{name} has turned to a life of villainy!",
                            f"{name} decided to retire from a life of heroism.",
-                           f"{name} lived long enough to see themselves become the villain...",
-                           f"Some kyptonite fell on {name}, they lost their powers!"])
+                           (f"{name} lived long enough to see themselves "
+                            "become the villain..."),
+                           (f"Some kyptonite fell on {name}, they lost their "
+                            "powers!")])
         await ctx.send(response)
 
     else:
         await member.add_roles(hero)
-        response = choice([f"{name} got hit by gamma radiation and turned green!",
-                           f"{name} stood up the challenge, and came out victorious!",
+        response = choice([(f"{name} got hit by gamma radiation and turned "
+                            "green!"),
+                           (f"{name} stood up the challenge, and came out "
+                            "victorious!"),
                            f"What kind of person is {name}? A Hero!",
-                           f"{name} is cooler than a cucumber, and greener still."])
+                           (f"{name} is cooler than a cucumber, and greener "
+                            "still.")])
         await ctx.send(response)
         return
 
@@ -199,10 +206,13 @@ async def gamedev(ctx, user):
 
     else:
         await member.add_roles(gdev)
-        response = choice([f"{name} got hit by gamma radiation and turned... blue?!",
-                           f"{name} stood up the challenge, and built something awesome!",
+        response = choice([(f"{name} got hit by gamma radiation and turned... "
+                            "blue?!"),
+                           (f"{name} stood up the challenge, and built "
+                            "something awesome!"),
                            f"What kind of person is {name}? A Developer!",
-                           f"{name} is cooler than a cucumber, and... well, far bluer."])
+                           (f"{name} is cooler than a cucumber, and... well, "
+                            "far bluer.")])
         await ctx.send(response)
 
 

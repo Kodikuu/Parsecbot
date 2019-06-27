@@ -469,7 +469,8 @@ class eSupport(commands.Cog, name="Support"):
         self.tracking.pop(keyword, None)
         self.save()
 
-        out = f"All instances of keyword '{keyword}' have been removed from data."
+        out = (f"All instances of keyword '{keyword}' have been removed from "
+               "data.")
         await ctx.send(out)
 
     async def dataProcess(self, key, period, green):
@@ -501,7 +502,9 @@ class eSupport(commands.Cog, name="Support"):
             pass
 
         count, users = await self.dataProcess(key, period, green)
-        await ctx.send(f"{count} count{'s'*(count!=1)} from {users} user{'s'*(users!=1)} in the past {period} day{'s'*(period!=1)}")
+        await ctx.send((f"{count} count{'s'*(count!=1)} from {users} "
+                        "user{'s'*(users!=1)} in the past {period} "
+                        "day{'s'*(period!=1)}"))
 
     @commands.command()
     @checks.moderator()
@@ -539,7 +542,8 @@ class eSupport(commands.Cog, name="Support"):
                   "is mentioned\n"
                   ">erroredit (key) track (True/False) - Track key mentions\n"
                   "\n"
-                  ">tracking (key) - Get total tracking data summary on key\n\n"
+                  ">tracking (key) - Get total tracking data summary on "
+                  "key\n\n"
                   ">data (key) [period=30] [green=True] - Get data info over "
                   "'period' days, in/excluding Heroes and up\n\n"
                   ">getTracking - Have a copy of all tracking data DM'd to you"
