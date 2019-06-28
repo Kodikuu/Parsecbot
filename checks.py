@@ -4,7 +4,7 @@ from discord.ext import commands
 def trusted():
     async def predicate(ctx):
         # Is the command user trusted?
-        role = ["Jedi", "Moderator", "Parsec Team"]
+        role = ["Jedi", "Community Manager", "Parsec Team"]
         return any([x in [y.name for y in ctx.author.roles] for x in role])
     return commands.check(predicate)
 
