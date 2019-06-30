@@ -132,7 +132,7 @@ async def tldr(ctx):
         "**right next to you** looking at your screen and with his own "
         "controller."
         "\n\n"
-        "This will work any game, emulator or program where your "
+        "This will work in any game, emulator or program where your "
         "friend's controller is used, like split-screen games."
         "\n\n"
         "This doesn't work like Hamachi, where you're supposed to have 2 "
