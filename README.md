@@ -1,4 +1,4 @@
-# Parsecbot
+# Parsecbot - DEFUNCT AS OF SUMMER 2019
 
 ## Requirements:
 - Python 3.7+
